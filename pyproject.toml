@@ -1,0 +1,23 @@
+[project]
+name = "pollster"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "aiosqlite>=0.20.0",
+    "alembic>=1.14.1",
+    "fastapi>=0.115.6",
+    "pydantic>=2.10.5",
+    "pydantic-settings>=2.7.1",
+    "sqlalchemy[asyncio]>=2.0.37",
+    "starlette[full]>=0.41.3",
+    "structlog>=25.1.0",
+    "typer>=0.15.1",
+    "uvicorn>=0.34.0",
+]
+
+[dependency-groups]
+dev = [
+    "ruff>=0.9.2",
+]
