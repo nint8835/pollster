@@ -3,6 +3,8 @@
  *
  * @version 0.1.0
  */
-export type TempModel = {
-    test: boolean;
+export type DiscordUser = {
+    id: string;
+    username: string;
+    is_owner: boolean;
 };

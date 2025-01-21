@@ -9,36 +9,46 @@ import type * as Fetcher from './pollsterFetcher';
 import { pollsterFetch } from './pollsterFetcher';
 import type * as Schemas from './pollsterSchemas';
 
-export type TestError = Fetcher.ErrorWrapper<undefined>;
+export type GetCurrentUserError = Fetcher.ErrorWrapper<undefined>;
 
-export type TestVariables = PollsterContext['fetcherOptions'];
+export type GetCurrentUserVariables = PollsterContext['fetcherOptions'];
 
-export const fetchTest = (variables: TestVariables, signal?: AbortSignal) =>
-    pollsterFetch<Schemas.TempModel, TestError, undefined, {}, {}, {}>({
-        url: '/test',
+/**
+ * Retrieve the details of the current user.
+ */
+export const fetchGetCurrentUser = (variables: GetCurrentUserVariables, signal?: AbortSignal) =>
+    pollsterFetch<Schemas.DiscordUser | null, GetCurrentUserError, undefined, {}, {}, {}>({
+        url: '/auth/me',
         method: 'get',
         ...variables,
         signal,
     });
 
-export const useTest = <TData = Schemas.TempModel>(
-    variables: TestVariables,
+/**
+ * Retrieve the details of the current user.
+ */
+export const useGetCurrentUser = <TData = Schemas.DiscordUser | null>(
+    variables: GetCurrentUserVariables,
     options?: Omit<
-        reactQuery.UseQueryOptions<Schemas.TempModel, TestError, TData>,
+        reactQuery.UseQueryOptions<Schemas.DiscordUser | null, GetCurrentUserError, TData>,
         'queryKey' | 'queryFn' | 'initialData'
     >,
 ) => {
     const { fetcherOptions, queryOptions, queryKeyFn } = usePollsterContext(options);
-    return reactQuery.useQuery<Schemas.TempModel, TestError, TData>({
-        queryKey: queryKeyFn({ path: '/test', operationId: 'test', variables }),
-        queryFn: ({ signal }) => fetchTest({ ...fetcherOptions, ...variables }, signal),
+    return reactQuery.useQuery<Schemas.DiscordUser | null, GetCurrentUserError, TData>({
+        queryKey: queryKeyFn({
+            path: '/auth/me',
+            operationId: 'getCurrentUser',
+            variables,
+        }),
+        queryFn: ({ signal }) => fetchGetCurrentUser({ ...fetcherOptions, ...variables }, signal),
         ...options,
         ...queryOptions,
     });
 };
 
 export type QueryOperation = {
-    path: '/test';
-    operationId: 'test';
-    variables: TestVariables;
+    path: '/auth/me';
+    operationId: 'getCurrentUser';
+    variables: GetCurrentUserVariables;
 };
