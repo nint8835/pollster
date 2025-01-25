@@ -1,5 +1,10 @@
 import { defineConfig } from '@openapi-codegen/cli';
-import { generateReactQueryComponents, generateSchemaTypes } from '@openapi-codegen/typescript';
+import {
+    generateReactQueryComponents,
+    generateReactQueryFunctions,
+    generateSchemaTypes,
+} from '@openapi-codegen/typescript';
+
 export default defineConfig({
     pollster: {
         from: {
@@ -13,6 +18,11 @@ export default defineConfig({
                 filenamePrefix,
             });
             await generateReactQueryComponents(context, {
+                filenamePrefix,
+                schemasFiles,
+                generateSuspenseQueries: true,
+            });
+            await generateReactQueryFunctions(context, {
                 filenamePrefix,
                 schemasFiles,
             });

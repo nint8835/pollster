@@ -48,6 +48,29 @@ export const useGetCurrentUser = <TData = Schemas.DiscordUser | null>(
     });
 };
 
+/**
+ * Retrieve the details of the current user.
+ */
+export const useSuspenseGetCurrentUser = <TData = Schemas.DiscordUser | null>(
+    variables: GetCurrentUserVariables,
+    options?: Omit<
+        reactQuery.UseQueryOptions<Schemas.DiscordUser | null, GetCurrentUserError, TData>,
+        'queryKey' | 'queryFn' | 'initialData'
+    >,
+) => {
+    const { fetcherOptions, queryOptions, queryKeyFn } = usePollsterContext(options);
+    return reactQuery.useSuspenseQuery<Schemas.DiscordUser | null, GetCurrentUserError, TData>({
+        queryKey: queryKeyFn({
+            path: '/auth/me',
+            operationId: 'getCurrentUser',
+            variables,
+        }),
+        queryFn: ({ signal }) => fetchGetCurrentUser({ ...fetcherOptions, ...variables }, signal),
+        ...options,
+        ...queryOptions,
+    });
+};
+
 export type QueryOperation = {
     path: '/auth/me';
     operationId: 'getCurrentUser';
