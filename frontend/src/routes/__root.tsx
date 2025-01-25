@@ -18,7 +18,7 @@ export const Route = createRootRoute({
     beforeLoad: async ({ location }) => {
         const currentUser = await fetchGetCurrentUser({});
         if (!currentUser) {
-            window.location.href = `/auth/login?next=${location.href}`;
+            window.location.href = `/auth/login?next=${encodeURIComponent(location.href)}`;
             return;
         }
         useStore.getState().setUser(currentUser);
