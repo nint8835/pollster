@@ -71,8 +71,68 @@ export const useSuspenseGetCurrentUser = <TData = Schemas.DiscordUser | null>(
     });
 };
 
-export type QueryOperation = {
-    path: '/auth/me';
-    operationId: 'getCurrentUser';
-    variables: GetCurrentUserVariables;
+export type ListVotesError = Fetcher.ErrorWrapper<undefined>;
+
+export type ListVotesResponse = Schemas.Vote[];
+
+export type ListVotesVariables = PollsterContext['fetcherOptions'];
+
+export const fetchListVotes = (variables: ListVotesVariables, signal?: AbortSignal) =>
+    pollsterFetch<ListVotesResponse, ListVotesError, undefined, {}, {}, {}>({
+        url: '/api/votes/',
+        method: 'get',
+        ...variables,
+        signal,
+    });
+
+export const useListVotes = <TData = ListVotesResponse>(
+    variables: ListVotesVariables,
+    options?: Omit<
+        reactQuery.UseQueryOptions<ListVotesResponse, ListVotesError, TData>,
+        'queryKey' | 'queryFn' | 'initialData'
+    >,
+) => {
+    const { fetcherOptions, queryOptions, queryKeyFn } = usePollsterContext(options);
+    return reactQuery.useQuery<ListVotesResponse, ListVotesError, TData>({
+        queryKey: queryKeyFn({
+            path: '/api/votes/',
+            operationId: 'listVotes',
+            variables,
+        }),
+        queryFn: ({ signal }) => fetchListVotes({ ...fetcherOptions, ...variables }, signal),
+        ...options,
+        ...queryOptions,
+    });
 };
+
+export const useSuspenseListVotes = <TData = ListVotesResponse>(
+    variables: ListVotesVariables,
+    options?: Omit<
+        reactQuery.UseQueryOptions<ListVotesResponse, ListVotesError, TData>,
+        'queryKey' | 'queryFn' | 'initialData'
+    >,
+) => {
+    const { fetcherOptions, queryOptions, queryKeyFn } = usePollsterContext(options);
+    return reactQuery.useSuspenseQuery<ListVotesResponse, ListVotesError, TData>({
+        queryKey: queryKeyFn({
+            path: '/api/votes/',
+            operationId: 'listVotes',
+            variables,
+        }),
+        queryFn: ({ signal }) => fetchListVotes({ ...fetcherOptions, ...variables }, signal),
+        ...options,
+        ...queryOptions,
+    });
+};
+
+export type QueryOperation =
+    | {
+          path: '/auth/me';
+          operationId: 'getCurrentUser';
+          variables: GetCurrentUserVariables;
+      }
+    | {
+          path: '/api/votes/';
+          operationId: 'listVotes';
+          variables: ListVotesVariables;
+      };

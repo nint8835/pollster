@@ -16,15 +16,18 @@ export default defineConfig({
             const filenamePrefix = 'pollster';
             const { schemasFiles } = await generateSchemaTypes(context, {
                 filenamePrefix,
+                useEnums: true,
             });
             await generateReactQueryComponents(context, {
                 filenamePrefix,
                 schemasFiles,
                 generateSuspenseQueries: true,
+                useEnums: true,
             });
             await generateReactQueryFunctions(context, {
                 filenamePrefix,
                 schemasFiles,
+                useEnums: true,
             });
         },
     },

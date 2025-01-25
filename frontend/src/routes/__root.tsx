@@ -7,14 +7,7 @@ import { useStore } from '@/lib/state';
 import { fetchGetCurrentUser } from '@/queries/api/pollsterComponents';
 
 export const Route = createRootRoute({
-    component: () => (
-        <>
-            <Outlet />
-            <ReactQueryDevtools initialIsOpen={false} />
-            <TanStackRouterDevtools />
-        </>
-    ),
-
+    component: Root,
     beforeLoad: async ({ location }) => {
         const currentUser = await fetchGetCurrentUser({});
         if (!currentUser) {
@@ -24,3 +17,13 @@ export const Route = createRootRoute({
         useStore.getState().setUser(currentUser);
     },
 });
+
+function Root() {
+    return (
+        <>
+            <Outlet />
+            <ReactQueryDevtools initialIsOpen={false} />
+            <TanStackRouterDevtools />
+        </>
+    );
+}

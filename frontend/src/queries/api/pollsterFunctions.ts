@@ -39,8 +39,39 @@ export const getCurrentUserQuery = (
     async ({ signal }: { signal?: AbortSignal }) => fetchGetCurrentUser({ ...variables }, signal),
 ];
 
-export type QueryOperation = {
-    path: '/auth/me';
-    operationId: 'getCurrentUser';
-    variables: GetCurrentUserVariables;
-};
+export type ListVotesError = Fetcher.ErrorWrapper<undefined>;
+
+export type ListVotesResponse = Schemas.Vote[];
+
+export type ListVotesVariables = PollsterContext['fetcherOptions'];
+
+export const fetchListVotes = (variables: ListVotesVariables, signal?: AbortSignal) =>
+    pollsterFetch<ListVotesResponse, ListVotesError, undefined, {}, {}, {}>({
+        url: '/api/votes/',
+        method: 'get',
+        ...variables,
+        signal,
+    });
+
+export const listVotesQuery = (
+    variables: ListVotesVariables,
+): [reactQuery.QueryKey, ({ signal }: { signal?: AbortSignal }) => Promise<ListVotesResponse>] => [
+    queryKeyFn({
+        path: '/api/votes/',
+        operationId: 'listVotes',
+        variables,
+    }),
+    async ({ signal }: { signal?: AbortSignal }) => fetchListVotes({ ...variables }, signal),
+];
+
+export type QueryOperation =
+    | {
+          path: '/auth/me';
+          operationId: 'getCurrentUser';
+          variables: GetCurrentUserVariables;
+      }
+    | {
+          path: '/api/votes/';
+          operationId: 'listVotes';
+          variables: ListVotesVariables;
+      };

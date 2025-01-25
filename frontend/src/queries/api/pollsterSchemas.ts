@@ -3,8 +3,27 @@
  *
  * @version 0.1.0
  */
+export enum VoteStatus {
+    pending = 'pending',
+    open = 'open',
+    closed = 'closed',
+}
+
 export type DiscordUser = {
     id: string;
     username: string;
     is_owner: boolean;
+};
+
+export type Vote = {
+    id: number;
+    name: string;
+    status: VoteStatus;
+    owner_id: string;
+    options: VoteOption[];
+};
+
+export type VoteOption = {
+    id: number;
+    name: string;
 };
