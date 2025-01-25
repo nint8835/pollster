@@ -1,1 +1,2 @@
-frontend/src/queries/api/** linguist-vendored
+frontend/src/queries/api/** linguist-generated
+/Users/nint8835/Development/pollster/frontend/src/routeTree.gen.ts linguist-generated
