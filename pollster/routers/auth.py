@@ -12,6 +12,9 @@ auth_router = APIRouter(tags=["Auth"])
 
 @auth_router.get("/login", include_in_schema=False)
 async def login(request: Request) -> Response:
+    next_url = request.query_params.get("next", "/")
+    request.session["next_url"] = next_url
+
     redirect_uri = request.url_for("oauth_callback")
     return cast(Response, await oauth.discord.authorize_redirect(request, redirect_uri))
 
@@ -29,7 +32,10 @@ async def oauth_callback(request: Request) -> Response:
     user_resp = await oauth.discord.get("users/@me", token=token)
     user = user_resp.json()
     request.session["user"] = SessionUser(**user).model_dump()
-    return RedirectResponse(url="/")
+
+    next_url = request.session.pop("next_url", "/")
+
+    return RedirectResponse(url=next_url)
 
 
 @auth_router.route("/logout", include_in_schema=False)

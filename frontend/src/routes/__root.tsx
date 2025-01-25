@@ -15,10 +15,10 @@ export const Route = createRootRoute({
         </>
     ),
 
-    beforeLoad: async () => {
+    beforeLoad: async ({ location }) => {
         const currentUser = await fetchGetCurrentUser({});
         if (!currentUser) {
-            window.location.href = '/auth/login';
+            window.location.href = `/auth/login?next=${location.href}`;
             return;
         }
         useStore.getState().setUser(currentUser);
