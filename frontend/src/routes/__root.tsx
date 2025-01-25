@@ -1,11 +1,12 @@
+import { QueryClientProvider } from '@tanstack/react-query';
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+import { Outlet, createRootRoute } from '@tanstack/react-router';
+
 import { TanStackRouterDevtools } from '@/components/util/router-dev-tools';
 import '@/index.css';
 import { useStore } from '@/lib/state';
 import { fetchGetCurrentUser } from '@/queries/api/pollsterComponents';
 import { queryClient } from '@/queries/client';
-import { QueryClientProvider } from '@tanstack/react-query';
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
-import { createRootRoute, Outlet } from '@tanstack/react-router';
 
 export const Route = createRootRoute({
     component: () => (

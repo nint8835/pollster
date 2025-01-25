@@ -5,5 +5,8 @@ export default {
     singleQuote: true,
     printWidth: 120,
     tabWidth: 4,
-    plugins: ['prettier-plugin-tailwindcss'],
+    plugins: ['@trivago/prettier-plugin-sort-imports', 'prettier-plugin-tailwindcss'],
+    importOrder: ['^@/(.*)$', '^[./]'],
+    importOrderSeparation: true,
+    importOrderSortSpecifiers: true,
 };

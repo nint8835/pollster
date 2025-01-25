@@ -4,7 +4,8 @@
  * @version 0.1.0
  */
 import * as reactQuery from '@tanstack/react-query';
-import { usePollsterContext, PollsterContext } from './pollsterContext';
+
+import { PollsterContext, usePollsterContext } from './pollsterContext';
 import type * as Fetcher from './pollsterFetcher';
 import { pollsterFetch } from './pollsterFetcher';
 import type * as Schemas from './pollsterSchemas';
