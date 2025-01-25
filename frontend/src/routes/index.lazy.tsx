@@ -1,3 +1,4 @@
+import { useStore } from '@/lib/state';
 import { createLazyFileRoute } from '@tanstack/react-router';
 
 export const Route = createLazyFileRoute('/')({
@@ -5,9 +6,10 @@ export const Route = createLazyFileRoute('/')({
 });
 
 function Index() {
+    const currentUser = useStore((state) => state.user);
     return (
         <div className="p-2">
-            <h3>Welcome Home!</h3>
+            <h3>Welcome {currentUser.username}!</h3>
         </div>
     );
 }
