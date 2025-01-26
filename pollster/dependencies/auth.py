@@ -33,6 +33,10 @@ def get_discord_user(request: Request) -> DiscordUser | None:
 def require_discord_user(request: Request) -> DiscordUser:
     user = get_discord_user(request)
     if user is None:
-        raise HTTPException(status_code=401, detail="Unauthorized")
+        raise HTTPException(
+            status_code=401,
+            detail="You must be logged in to access this API.",
+            headers={"Content-Type": "application/json"},
+        )
 
     return user

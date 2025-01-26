@@ -71,12 +71,18 @@ export const useSuspenseGetCurrentUser = <TData = Schemas.DiscordUser | null>(
     });
 };
 
-export type ListVotesError = Fetcher.ErrorWrapper<undefined>;
+export type ListVotesError = Fetcher.ErrorWrapper<{
+    status: 401;
+    payload: Schemas.ErrorResponse;
+}>;
 
 export type ListVotesResponse = Schemas.Vote[];
 
 export type ListVotesVariables = PollsterContext['fetcherOptions'];
 
+/**
+ * List all votes.
+ */
 export const fetchListVotes = (variables: ListVotesVariables, signal?: AbortSignal) =>
     pollsterFetch<ListVotesResponse, ListVotesError, undefined, {}, {}, {}>({
         url: '/api/votes/',
@@ -85,6 +91,9 @@ export const fetchListVotes = (variables: ListVotesVariables, signal?: AbortSign
         signal,
     });
 
+/**
+ * List all votes.
+ */
 export const useListVotes = <TData = ListVotesResponse>(
     variables: ListVotesVariables,
     options?: Omit<
@@ -105,6 +114,9 @@ export const useListVotes = <TData = ListVotesResponse>(
     });
 };
 
+/**
+ * List all votes.
+ */
 export const useSuspenseListVotes = <TData = ListVotesResponse>(
     variables: ListVotesVariables,
     options?: Omit<
@@ -122,6 +134,49 @@ export const useSuspenseListVotes = <TData = ListVotesResponse>(
         queryFn: ({ signal }) => fetchListVotes({ ...fetcherOptions, ...variables }, signal),
         ...options,
         ...queryOptions,
+    });
+};
+
+export type CreateVoteError = Fetcher.ErrorWrapper<
+    | {
+          status: 401;
+          payload: Schemas.ErrorResponse;
+      }
+    | {
+          status: 403;
+          payload: Schemas.ErrorResponse;
+      }
+    | {
+          status: 422;
+          payload: Schemas.HTTPValidationError;
+      }
+>;
+
+export type CreateVoteVariables = {
+    body: Schemas.CreateVote;
+} & PollsterContext['fetcherOptions'];
+
+/**
+ * Create a new vote.
+ */
+export const fetchCreateVote = (variables: CreateVoteVariables, signal?: AbortSignal) =>
+    pollsterFetch<Schemas.Vote, CreateVoteError, Schemas.CreateVote, {}, {}, {}>({
+        url: '/api/votes/',
+        method: 'post',
+        ...variables,
+        signal,
+    });
+
+/**
+ * Create a new vote.
+ */
+export const useCreateVote = (
+    options?: Omit<reactQuery.UseMutationOptions<Schemas.Vote, CreateVoteError, CreateVoteVariables>, 'mutationFn'>,
+) => {
+    const { fetcherOptions } = usePollsterContext();
+    return reactQuery.useMutation<Schemas.Vote, CreateVoteError, CreateVoteVariables>({
+        mutationFn: (variables: CreateVoteVariables) => fetchCreateVote({ ...fetcherOptions, ...variables }),
+        ...options,
     });
 };
 

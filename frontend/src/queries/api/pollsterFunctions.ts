@@ -39,12 +39,18 @@ export const getCurrentUserQuery = (
     async ({ signal }: { signal?: AbortSignal }) => fetchGetCurrentUser({ ...variables }, signal),
 ];
 
-export type ListVotesError = Fetcher.ErrorWrapper<undefined>;
+export type ListVotesError = Fetcher.ErrorWrapper<{
+    status: 401;
+    payload: Schemas.ErrorResponse;
+}>;
 
 export type ListVotesResponse = Schemas.Vote[];
 
 export type ListVotesVariables = PollsterContext['fetcherOptions'];
 
+/**
+ * List all votes.
+ */
 export const fetchListVotes = (variables: ListVotesVariables, signal?: AbortSignal) =>
     pollsterFetch<ListVotesResponse, ListVotesError, undefined, {}, {}, {}>({
         url: '/api/votes/',
@@ -53,6 +59,9 @@ export const fetchListVotes = (variables: ListVotesVariables, signal?: AbortSign
         signal,
     });
 
+/**
+ * List all votes.
+ */
 export const listVotesQuery = (
     variables: ListVotesVariables,
 ): [reactQuery.QueryKey, ({ signal }: { signal?: AbortSignal }) => Promise<ListVotesResponse>] => [

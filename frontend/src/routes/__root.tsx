@@ -1,6 +1,6 @@
 import { HeroUIProvider, Link, Navbar, NavbarBrand } from '@heroui/react';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
-import { Outlet, createRootRoute } from '@tanstack/react-router';
+import { Outlet, createRootRoute, redirect } from '@tanstack/react-router';
 import type { NavigateOptions, ToOptions } from '@tanstack/react-router';
 import { useRouter } from '@tanstack/react-router';
 
@@ -14,8 +14,11 @@ export const Route = createRootRoute({
     beforeLoad: async ({ location }) => {
         const currentUser = await fetchGetCurrentUser({});
         if (!currentUser) {
-            window.location.href = `/auth/login?next=${encodeURIComponent(location.href)}`;
-            return;
+            throw redirect({
+                to: '/auth/login',
+                search: { next: location.href },
+                reloadDocument: true,
+            });
         }
         useStore.getState().setUser(currentUser);
     },
@@ -44,7 +47,7 @@ function Root() {
                         </Link>
                     </NavbarBrand>
                 </Navbar>
-                <main className="container mx-auto max-w-7xl flex-grow px-6 pt-16">
+                <main className="container mx-auto max-w-7xl flex-grow px-6">
                     <Outlet />
                 </main>
             </div>

@@ -9,10 +9,34 @@ export enum VoteStatus {
     closed = 'closed',
 }
 
+export type CreateVote = {
+    name: string;
+};
+
 export type DiscordUser = {
     id: string;
     username: string;
     is_owner: boolean;
+};
+
+/**
+ * A generic error response.
+ */
+export type ErrorResponse = {
+    /**
+     * A description of the error.
+     */
+    detail: string;
+};
+
+export type HTTPValidationError = {
+    detail?: ValidationError[];
+};
+
+export type ValidationError = {
+    loc: (string | number)[];
+    msg: string;
+    type: string;
 };
 
 export type Vote = {
