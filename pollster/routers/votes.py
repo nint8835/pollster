@@ -32,6 +32,7 @@ async def list_votes(db: AsyncSession = Depends(get_db)) -> Sequence[Vote]:
     """List all votes."""
     return (
         (await db.execute(select(Vote).options(joinedload(Vote.options))))
+        .unique()
         .scalars()
         .all()
     )
