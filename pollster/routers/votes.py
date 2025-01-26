@@ -38,6 +38,51 @@ async def list_votes(db: AsyncSession = Depends(get_db)) -> Sequence[Vote]:
     )
 
 
+@votes_router.get(
+    "/{vote_id}",
+    response_model=VoteSchema,
+    responses={
+        status.HTTP_401_UNAUTHORIZED: {
+            "description": "Unauthorized",
+            "model": ErrorResponse,
+        },
+        status.HTTP_404_NOT_FOUND: {
+            "description": "Vote not found",
+            "model": ErrorResponse,
+        },
+    },
+)
+async def get_vote(vote_id: str, db: AsyncSession = Depends(get_db)):
+    """Retrieve a vote by ID."""
+    try:
+        int_vote_id = int(vote_id)
+    except ValueError:
+        return JSONResponse(
+            status_code=status.HTTP_404_NOT_FOUND,
+            content=ErrorResponse(detail="Vote not found.").model_dump(),
+        )
+
+    vote = (
+        (
+            await db.execute(
+                select(Vote)
+                .where(Vote.id == int_vote_id)
+                .options(joinedload(Vote.options))
+            )
+        )
+        .unique()
+        .scalar_one_or_none()
+    )
+
+    if vote is None:
+        return JSONResponse(
+            status_code=status.HTTP_404_NOT_FOUND,
+            content=ErrorResponse(detail="Vote not found.").model_dump(),
+        )
+
+    return vote
+
+
 @votes_router.post(
     "/",
     status_code=status.HTTP_201_CREATED,

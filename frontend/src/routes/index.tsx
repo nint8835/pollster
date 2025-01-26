@@ -1,6 +1,7 @@
 import { Chip, ChipProps, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow } from '@heroui/react';
 import { createFileRoute } from '@tanstack/react-router';
 
+import { Link } from '@/components/link';
 import { useSuspenseListVotes } from '@/queries/api/pollsterComponents';
 import { listVotesQuery } from '@/queries/api/pollsterFunctions';
 import { VoteStatus } from '@/queries/api/pollsterSchemas';
@@ -37,7 +38,7 @@ function RouteComponent() {
     const { data: votes } = useSuspenseListVotes({});
 
     return (
-        <Table>
+        <Table aria-label="Table of all votes">
             <TableHeader columns={columns}>
                 {(column) => <TableColumn key={column.name}>{column.name}</TableColumn>}
             </TableHeader>
@@ -45,7 +46,11 @@ function RouteComponent() {
                 {(item) => (
                     <TableRow key={item.id}>
                         <TableCell>{item.id}</TableCell>
-                        <TableCell>{item.name}</TableCell>
+                        <TableCell>
+                            <Link to="/votes/$voteId" params={{ voteId: item.id.toString() }} color="foreground">
+                                {item.name}
+                            </Link>
+                        </TableCell>
                         <TableCell>
                             <StatusCell status={item.status} />
                         </TableCell>

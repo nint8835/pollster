@@ -13,6 +13,7 @@
 import { Route as rootRoute } from './routes/__root'
 import { Route as IndexImport } from './routes/index'
 import { Route as AuthLoginImport } from './routes/auth/login'
+import { Route as VotesVoteIdIndexImport } from './routes/votes/$voteId/index'
 
 // Create/Update Routes
 
@@ -25,6 +26,12 @@ const IndexRoute = IndexImport.update({
 const AuthLoginRoute = AuthLoginImport.update({
   id: '/auth/login',
   path: '/auth/login',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const VotesVoteIdIndexRoute = VotesVoteIdIndexImport.update({
+  id: '/votes/$voteId/',
+  path: '/votes/$voteId/',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -46,6 +53,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthLoginImport
       parentRoute: typeof rootRoute
     }
+    '/votes/$voteId/': {
+      id: '/votes/$voteId/'
+      path: '/votes/$voteId'
+      fullPath: '/votes/$voteId'
+      preLoaderRoute: typeof VotesVoteIdIndexImport
+      parentRoute: typeof rootRoute
+    }
   }
 }
 
@@ -54,36 +68,41 @@ declare module '@tanstack/react-router' {
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth/login': typeof AuthLoginRoute
+  '/votes/$voteId': typeof VotesVoteIdIndexRoute
 }
 
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth/login': typeof AuthLoginRoute
+  '/votes/$voteId': typeof VotesVoteIdIndexRoute
 }
 
 export interface FileRoutesById {
   __root__: typeof rootRoute
   '/': typeof IndexRoute
   '/auth/login': typeof AuthLoginRoute
+  '/votes/$voteId/': typeof VotesVoteIdIndexRoute
 }
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth/login'
+  fullPaths: '/' | '/auth/login' | '/votes/$voteId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth/login'
-  id: '__root__' | '/' | '/auth/login'
+  to: '/' | '/auth/login' | '/votes/$voteId'
+  id: '__root__' | '/' | '/auth/login' | '/votes/$voteId/'
   fileRoutesById: FileRoutesById
 }
 
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthLoginRoute: typeof AuthLoginRoute
+  VotesVoteIdIndexRoute: typeof VotesVoteIdIndexRoute
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthLoginRoute: AuthLoginRoute,
+  VotesVoteIdIndexRoute: VotesVoteIdIndexRoute,
 }
 
 export const routeTree = rootRoute
@@ -97,7 +116,8 @@ export const routeTree = rootRoute
       "filePath": "__root.tsx",
       "children": [
         "/",
-        "/auth/login"
+        "/auth/login",
+        "/votes/$voteId/"
       ]
     },
     "/": {
@@ -105,6 +125,9 @@ export const routeTree = rootRoute
     },
     "/auth/login": {
       "filePath": "auth/login.tsx"
+    },
+    "/votes/$voteId/": {
+      "filePath": "votes/$voteId/index.tsx"
     }
   }
 }

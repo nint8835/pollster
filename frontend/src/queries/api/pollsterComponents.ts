@@ -180,6 +180,86 @@ export const useCreateVote = (
     });
 };
 
+export type GetVotePathParams = {
+    voteId: string;
+};
+
+export type GetVoteError = Fetcher.ErrorWrapper<
+    | {
+          status: 401;
+          payload: Schemas.ErrorResponse;
+      }
+    | {
+          status: 404;
+          payload: Schemas.ErrorResponse;
+      }
+    | {
+          status: 422;
+          payload: Schemas.HTTPValidationError;
+      }
+>;
+
+export type GetVoteVariables = {
+    pathParams: GetVotePathParams;
+} & PollsterContext['fetcherOptions'];
+
+/**
+ * Retrieve a vote by ID.
+ */
+export const fetchGetVote = (variables: GetVoteVariables, signal?: AbortSignal) =>
+    pollsterFetch<Schemas.Vote, GetVoteError, undefined, {}, {}, GetVotePathParams>({
+        url: '/api/votes/{voteId}',
+        method: 'get',
+        ...variables,
+        signal,
+    });
+
+/**
+ * Retrieve a vote by ID.
+ */
+export const useGetVote = <TData = Schemas.Vote>(
+    variables: GetVoteVariables,
+    options?: Omit<
+        reactQuery.UseQueryOptions<Schemas.Vote, GetVoteError, TData>,
+        'queryKey' | 'queryFn' | 'initialData'
+    >,
+) => {
+    const { fetcherOptions, queryOptions, queryKeyFn } = usePollsterContext(options);
+    return reactQuery.useQuery<Schemas.Vote, GetVoteError, TData>({
+        queryKey: queryKeyFn({
+            path: '/api/votes/{voteId}',
+            operationId: 'getVote',
+            variables,
+        }),
+        queryFn: ({ signal }) => fetchGetVote({ ...fetcherOptions, ...variables }, signal),
+        ...options,
+        ...queryOptions,
+    });
+};
+
+/**
+ * Retrieve a vote by ID.
+ */
+export const useSuspenseGetVote = <TData = Schemas.Vote>(
+    variables: GetVoteVariables,
+    options?: Omit<
+        reactQuery.UseQueryOptions<Schemas.Vote, GetVoteError, TData>,
+        'queryKey' | 'queryFn' | 'initialData'
+    >,
+) => {
+    const { fetcherOptions, queryOptions, queryKeyFn } = usePollsterContext(options);
+    return reactQuery.useSuspenseQuery<Schemas.Vote, GetVoteError, TData>({
+        queryKey: queryKeyFn({
+            path: '/api/votes/{voteId}',
+            operationId: 'getVote',
+            variables,
+        }),
+        queryFn: ({ signal }) => fetchGetVote({ ...fetcherOptions, ...variables }, signal),
+        ...options,
+        ...queryOptions,
+    });
+};
+
 export type QueryOperation =
     | {
           path: '/auth/me';
@@ -190,4 +270,9 @@ export type QueryOperation =
           path: '/api/votes/';
           operationId: 'listVotes';
           variables: ListVotesVariables;
+      }
+    | {
+          path: '/api/votes/{voteId}';
+          operationId: 'getVote';
+          variables: GetVoteVariables;
       };

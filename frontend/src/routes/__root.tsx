@@ -12,6 +12,10 @@ import { fetchGetCurrentUser } from '@/queries/api/pollsterComponents';
 export const Route = createRootRoute({
     component: Root,
     beforeLoad: async ({ location }) => {
+        if (useStore.getState().user.id) {
+            return;
+        }
+
         const currentUser = await fetchGetCurrentUser({});
         if (!currentUser) {
             throw redirect({
