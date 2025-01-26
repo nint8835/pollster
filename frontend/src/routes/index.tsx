@@ -16,7 +16,7 @@ import {
     TableRow,
     useDisclosure,
 } from '@heroui/react';
-import { createFileRoute } from '@tanstack/react-router';
+import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { Plus } from 'lucide-react';
 import { useState } from 'react';
 
@@ -57,9 +57,10 @@ function StatusCell({ status }: { status: VoteStatus }) {
 function CreateVoteModal({ isOpen, onOpenChange }: { isOpen: boolean; onOpenChange: (isOpen: boolean) => void }) {
     const { mutateAsync: createVote } = useCreateVote();
     const [name, setName] = useState('');
+    const navigate = useNavigate();
 
     return (
-        <Modal isOpen={isOpen} onOpenChange={onOpenChange}>
+        <Modal isOpen={isOpen} onOpenChange={onOpenChange} backdrop="blur">
             <ModalContent>
                 <ModalHeader>Create Vote</ModalHeader>
                 <ModalBody>
@@ -69,9 +70,10 @@ function CreateVoteModal({ isOpen, onOpenChange }: { isOpen: boolean; onOpenChan
                     <Button
                         color="primary"
                         onPress={async () => {
-                            await createVote({ body: { name } });
+                            const newVote = await createVote({ body: { name } });
                             queryClient.invalidateQueries({ queryKey: listVotesQuery({})[0] });
                             onOpenChange(false);
+                            navigate({ to: '/votes/$voteId/manage', params: { voteId: newVote.id.toString() } });
                         }}
                     >
                         Create
