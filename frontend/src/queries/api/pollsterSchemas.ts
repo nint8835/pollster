@@ -13,6 +13,10 @@ export type CreateVote = {
     name: string;
 };
 
+export type CreateVoteOption = {
+    name: string;
+};
+
 export type DiscordUser = {
     id: string;
     username: string;

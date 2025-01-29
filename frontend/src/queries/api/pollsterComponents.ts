@@ -260,6 +260,69 @@ export const useSuspenseGetVote = <TData = Schemas.Vote>(
     });
 };
 
+export type CreateVoteOptionPathParams = {
+    voteId: string;
+};
+
+export type CreateVoteOptionError = Fetcher.ErrorWrapper<
+    | {
+          status: 401;
+          payload: Schemas.ErrorResponse;
+      }
+    | {
+          status: 403;
+          payload: Schemas.ErrorResponse;
+      }
+    | {
+          status: 404;
+          payload: Schemas.ErrorResponse;
+      }
+    | {
+          status: 422;
+          payload: Schemas.HTTPValidationError;
+      }
+>;
+
+export type CreateVoteOptionVariables = {
+    body: Schemas.CreateVoteOption;
+    pathParams: CreateVoteOptionPathParams;
+} & PollsterContext['fetcherOptions'];
+
+/**
+ * Create a new option for a vote.
+ */
+export const fetchCreateVoteOption = (variables: CreateVoteOptionVariables, signal?: AbortSignal) =>
+    pollsterFetch<
+        Schemas.VoteOption,
+        CreateVoteOptionError,
+        Schemas.CreateVoteOption,
+        {},
+        {},
+        CreateVoteOptionPathParams
+    >({
+        url: '/api/votes/{voteId}/options',
+        method: 'post',
+        ...variables,
+        signal,
+    });
+
+/**
+ * Create a new option for a vote.
+ */
+export const useCreateVoteOption = (
+    options?: Omit<
+        reactQuery.UseMutationOptions<Schemas.VoteOption, CreateVoteOptionError, CreateVoteOptionVariables>,
+        'mutationFn'
+    >,
+) => {
+    const { fetcherOptions } = usePollsterContext();
+    return reactQuery.useMutation<Schemas.VoteOption, CreateVoteOptionError, CreateVoteOptionVariables>({
+        mutationFn: (variables: CreateVoteOptionVariables) =>
+            fetchCreateVoteOption({ ...fetcherOptions, ...variables }),
+        ...options,
+    });
+};
+
 export type QueryOperation =
     | {
           path: '/auth/me';

@@ -9,11 +9,12 @@ from sqlalchemy.orm import joinedload
 from pollster.config import config
 from pollster.dependencies.auth import require_discord_user
 from pollster.dependencies.database import get_db
-from pollster.models.vote import Vote, VoteStatus
+from pollster.models.vote import Vote, VoteOption, VoteStatus
 from pollster.schemas import ErrorResponse
 from pollster.schemas.discord_user import DiscordUser
-from pollster.schemas.votes import CreateVote
+from pollster.schemas.votes import CreateVote, CreateVoteOption
 from pollster.schemas.votes import Vote as VoteSchema
+from pollster.schemas.votes import VoteOption as VoteOptionSchema
 
 votes_router = APIRouter(tags=["Votes"], dependencies=[Depends(require_discord_user)])
 
@@ -117,6 +118,71 @@ async def create_vote(
         await db.commit()
 
     return new_vote
+
+
+@votes_router.post(
+    "/{vote_id}/options",
+    status_code=status.HTTP_201_CREATED,
+    response_model=VoteOptionSchema,
+    responses={
+        status.HTTP_401_UNAUTHORIZED: {
+            "description": "Unauthorized",
+            "model": ErrorResponse,
+        },
+        status.HTTP_403_FORBIDDEN: {"description": "Forbidden", "model": ErrorResponse},
+        status.HTTP_404_NOT_FOUND: {
+            "description": "Vote not found",
+            "model": ErrorResponse,
+        },
+    },
+)
+async def create_vote_option(
+    vote_id: str,
+    option: CreateVoteOption,
+    db: AsyncSession = Depends(get_db),
+    user: DiscordUser = Depends(require_discord_user),
+):
+    """Create a new option for a vote."""
+    try:
+        int_vote_id = int(vote_id)
+    except ValueError:
+        return JSONResponse(
+            status_code=status.HTTP_404_NOT_FOUND,
+            content=ErrorResponse(detail="Vote not found.").model_dump(),
+        )
+
+    async with db.begin():
+        vote = (
+            (
+                await db.execute(
+                    select(Vote)
+                    .where(Vote.id == int_vote_id)
+                    .options(joinedload(Vote.options))
+                )
+            )
+            .unique()
+            .scalar_one_or_none()
+        )
+
+        if vote is None:
+            return JSONResponse(
+                status_code=status.HTTP_404_NOT_FOUND,
+                content=ErrorResponse(detail="Vote not found.").model_dump(),
+            )
+
+        if user.id != config.owner_id:
+            return JSONResponse(
+                status_code=status.HTTP_403_FORBIDDEN,
+                content=ErrorResponse(
+                    detail="You do not have permission to create new options for this vote."
+                ).model_dump(),
+            )
+
+        new_option = VoteOption(vote_id=vote.id, name=option.name)
+        db.add(new_option)
+        await db.commit()
+
+    return new_option
 
 
 __all__ = ["votes_router"]
