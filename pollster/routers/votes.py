@@ -12,9 +12,17 @@ from pollster.dependencies.database import get_db
 from pollster.models.vote import Vote, VoteOption, VoteStatus
 from pollster.schemas import ErrorResponse
 from pollster.schemas.discord_user import DiscordUser
-from pollster.schemas.votes import CreateVote, CreateVoteOption, EditVoteOption
-from pollster.schemas.votes import Vote as VoteSchema
-from pollster.schemas.votes import VoteOption as VoteOptionSchema
+from pollster.schemas.votes import (
+    CreateVote,
+    CreateVoteOption,
+    EditVoteOption,
+)
+from pollster.schemas.votes import (
+    Vote as VoteSchema,
+)
+from pollster.schemas.votes import (
+    VoteOption as VoteOptionSchema,
+)
 
 votes_router = APIRouter(tags=["Votes"], dependencies=[Depends(require_discord_user)])
 
