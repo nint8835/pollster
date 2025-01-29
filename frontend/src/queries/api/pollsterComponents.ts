@@ -323,6 +323,62 @@ export const useCreateVoteOption = (
     });
 };
 
+export type EditVoteOptionPathParams = {
+    voteId: string;
+    optionId: string;
+};
+
+export type EditVoteOptionError = Fetcher.ErrorWrapper<
+    | {
+          status: 401;
+          payload: Schemas.ErrorResponse;
+      }
+    | {
+          status: 403;
+          payload: Schemas.ErrorResponse;
+      }
+    | {
+          status: 404;
+          payload: Schemas.ErrorResponse;
+      }
+    | {
+          status: 422;
+          payload: Schemas.HTTPValidationError;
+      }
+>;
+
+export type EditVoteOptionVariables = {
+    body: Schemas.EditVoteOption;
+    pathParams: EditVoteOptionPathParams;
+} & PollsterContext['fetcherOptions'];
+
+/**
+ * Edit an option for a vote.
+ */
+export const fetchEditVoteOption = (variables: EditVoteOptionVariables, signal?: AbortSignal) =>
+    pollsterFetch<Schemas.VoteOption, EditVoteOptionError, Schemas.EditVoteOption, {}, {}, EditVoteOptionPathParams>({
+        url: '/api/votes/{voteId}/options/{optionId}',
+        method: 'patch',
+        ...variables,
+        signal,
+    });
+
+/**
+ * Edit an option for a vote.
+ */
+export const useEditVoteOption = (
+    options?: Omit<
+        reactQuery.UseMutationOptions<Schemas.VoteOption, EditVoteOptionError, EditVoteOptionVariables>,
+        'mutationFn'
+    >,
+) => {
+    const { fetcherOptions } = usePollsterContext();
+    return reactQuery.useMutation<Schemas.VoteOption, EditVoteOptionError, EditVoteOptionVariables>({
+        mutationFn: (variables: EditVoteOptionVariables) => fetchEditVoteOption({ ...fetcherOptions, ...variables }),
+        ...options,
+    });
+};
+
 export type QueryOperation =
     | {
           path: '/auth/me';

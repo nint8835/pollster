@@ -23,6 +23,10 @@ export type DiscordUser = {
     is_owner: boolean;
 };
 
+export type EditVoteOption = {
+    name: string;
+};
+
 /**
  * A generic error response.
  */

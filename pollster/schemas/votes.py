@@ -28,4 +28,8 @@ class CreateVoteOption(BaseModel):
     name: str
 
 
-__all__ = ["Vote", "VoteOption", "CreateVote", "CreateVoteOption"]
+class EditVoteOption(BaseModel):
+    name: str
+
+
+__all__ = ["Vote", "VoteOption", "CreateVote", "CreateVoteOption", "EditVoteOption"]
