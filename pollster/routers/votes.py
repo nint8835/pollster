@@ -254,4 +254,62 @@ async def edit_vote_option(
     return option_model
 
 
+@votes_router.delete(
+    "/{vote_id}/options/{option_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    responses={
+        status.HTTP_401_UNAUTHORIZED: {
+            "description": "Unauthorized",
+            "model": ErrorResponse,
+        },
+        status.HTTP_403_FORBIDDEN: {"description": "Forbidden", "model": ErrorResponse},
+        status.HTTP_404_NOT_FOUND: {
+            "description": "Vote or option not found",
+            "model": ErrorResponse,
+        },
+    },
+)
+async def delete_vote_option(
+    vote_id: str,
+    option_id: str,
+    db: AsyncSession = Depends(get_db),
+    user: DiscordUser = Depends(require_discord_user),
+):
+    """Delete an option for a vote."""
+    try:
+        int_vote_id = int(vote_id)
+        int_option_id = int(option_id)
+    except ValueError:
+        return JSONResponse(
+            status_code=status.HTTP_404_NOT_FOUND,
+            content=ErrorResponse(detail="Vote or option not found.").model_dump(),
+        )
+
+    async with db.begin():
+        option_model = (
+            await db.execute(
+                select(VoteOption)
+                .where(VoteOption.vote_id == int_vote_id)
+                .where(VoteOption.id == int_option_id)
+            )
+        ).scalar_one_or_none()
+
+        if option_model is None:
+            return JSONResponse(
+                status_code=status.HTTP_404_NOT_FOUND,
+                content=ErrorResponse(detail="Vote or option not found.").model_dump(),
+            )
+
+        if user.id != config.owner_id:
+            return JSONResponse(
+                status_code=status.HTTP_403_FORBIDDEN,
+                content=ErrorResponse(
+                    detail="You do not have permission to delete this option."
+                ).model_dump(),
+            )
+
+        await db.delete(option_model)
+        await db.commit()
+
+
 __all__ = ["votes_router"]

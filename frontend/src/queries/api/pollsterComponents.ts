@@ -379,6 +379,62 @@ export const useEditVoteOption = (
     });
 };
 
+export type DeleteVoteOptionPathParams = {
+    voteId: string;
+    optionId: string;
+};
+
+export type DeleteVoteOptionError = Fetcher.ErrorWrapper<
+    | {
+          status: 401;
+          payload: Schemas.ErrorResponse;
+      }
+    | {
+          status: 403;
+          payload: Schemas.ErrorResponse;
+      }
+    | {
+          status: 404;
+          payload: Schemas.ErrorResponse;
+      }
+    | {
+          status: 422;
+          payload: Schemas.HTTPValidationError;
+      }
+>;
+
+export type DeleteVoteOptionVariables = {
+    pathParams: DeleteVoteOptionPathParams;
+} & PollsterContext['fetcherOptions'];
+
+/**
+ * Delete an option for a vote.
+ */
+export const fetchDeleteVoteOption = (variables: DeleteVoteOptionVariables, signal?: AbortSignal) =>
+    pollsterFetch<undefined, DeleteVoteOptionError, undefined, {}, {}, DeleteVoteOptionPathParams>({
+        url: '/api/votes/{voteId}/options/{optionId}',
+        method: 'delete',
+        ...variables,
+        signal,
+    });
+
+/**
+ * Delete an option for a vote.
+ */
+export const useDeleteVoteOption = (
+    options?: Omit<
+        reactQuery.UseMutationOptions<undefined, DeleteVoteOptionError, DeleteVoteOptionVariables>,
+        'mutationFn'
+    >,
+) => {
+    const { fetcherOptions } = usePollsterContext();
+    return reactQuery.useMutation<undefined, DeleteVoteOptionError, DeleteVoteOptionVariables>({
+        mutationFn: (variables: DeleteVoteOptionVariables) =>
+            fetchDeleteVoteOption({ ...fetcherOptions, ...variables }),
+        ...options,
+    });
+};
+
 export type QueryOperation =
     | {
           path: '/auth/me';
