@@ -5,7 +5,6 @@ import { useStore } from '@/lib/state';
 import { useSuspenseGetVote } from '@/queries/api/pollsterComponents';
 import { getVoteQuery } from '@/queries/api/pollsterFunctions';
 import { queryClient } from '@/queries/client';
-import { convertQueryOpts } from '@/queries/utils';
 
 export const Route = createFileRoute('/votes/$voteId/manage')({
     component: RouteComponent,
@@ -16,8 +15,7 @@ export const Route = createFileRoute('/votes/$voteId/manage')({
             throw new Error('You must be the owner to manage a vote');
         }
     },
-    loader: ({ params }) =>
-        queryClient.ensureQueryData(convertQueryOpts(getVoteQuery({ pathParams: { voteId: params.voteId } }))),
+    loader: ({ params }) => queryClient.ensureQueryData(getVoteQuery({ pathParams: { voteId: params.voteId } })),
 });
 
 function RouteComponent() {

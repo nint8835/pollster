@@ -5,7 +5,7 @@
  */
 import * as reactQuery from '@tanstack/react-query';
 
-import { PollsterContext, usePollsterContext } from './pollsterContext';
+import { PollsterContext, queryKeyFn, usePollsterContext } from './pollsterContext';
 import type * as Fetcher from './pollsterFetcher';
 import { pollsterFetch } from './pollsterFetcher';
 import type * as Schemas from './pollsterSchemas';
@@ -28,25 +28,19 @@ export const fetchGetCurrentUser = (variables: GetCurrentUserVariables, signal?:
 /**
  * Retrieve the details of the current user.
  */
-export const useGetCurrentUser = <TData = Schemas.DiscordUser | null>(
+export const getCurrentUserQuery = (
     variables: GetCurrentUserVariables,
-    options?: Omit<
-        reactQuery.UseQueryOptions<Schemas.DiscordUser | null, GetCurrentUserError, TData>,
-        'queryKey' | 'queryFn' | 'initialData'
-    >,
-) => {
-    const { fetcherOptions, queryOptions, queryKeyFn } = usePollsterContext(options);
-    return reactQuery.useQuery<Schemas.DiscordUser | null, GetCurrentUserError, TData>({
-        queryKey: queryKeyFn({
-            path: '/auth/me',
-            operationId: 'getCurrentUser',
-            variables,
-        }),
-        queryFn: ({ signal }) => fetchGetCurrentUser({ ...fetcherOptions, ...variables }, signal),
-        ...options,
-        ...queryOptions,
-    });
-};
+): {
+    queryKey: reactQuery.QueryKey;
+    queryFn: ({ signal }: { signal?: AbortSignal }) => Promise<Schemas.DiscordUser | null>;
+} => ({
+    queryKey: queryKeyFn({
+        path: '/auth/me',
+        operationId: 'getCurrentUser',
+        variables,
+    }),
+    queryFn: ({ signal }: { signal?: AbortSignal }) => fetchGetCurrentUser(variables, signal),
+});
 
 /**
  * Retrieve the details of the current user.
@@ -58,14 +52,27 @@ export const useSuspenseGetCurrentUser = <TData = Schemas.DiscordUser | null>(
         'queryKey' | 'queryFn' | 'initialData'
     >,
 ) => {
-    const { fetcherOptions, queryOptions, queryKeyFn } = usePollsterContext(options);
+    const { queryOptions } = usePollsterContext(options);
     return reactQuery.useSuspenseQuery<Schemas.DiscordUser | null, GetCurrentUserError, TData>({
-        queryKey: queryKeyFn({
-            path: '/auth/me',
-            operationId: 'getCurrentUser',
-            variables,
-        }),
-        queryFn: ({ signal }) => fetchGetCurrentUser({ ...fetcherOptions, ...variables }, signal),
+        ...getCurrentUserQuery(variables),
+        ...options,
+        ...queryOptions,
+    });
+};
+
+/**
+ * Retrieve the details of the current user.
+ */
+export const useGetCurrentUser = <TData = Schemas.DiscordUser | null>(
+    variables: GetCurrentUserVariables,
+    options?: Omit<
+        reactQuery.UseQueryOptions<Schemas.DiscordUser | null, GetCurrentUserError, TData>,
+        'queryKey' | 'queryFn' | 'initialData'
+    >,
+) => {
+    const { queryOptions } = usePollsterContext(options);
+    return reactQuery.useQuery<Schemas.DiscordUser | null, GetCurrentUserError, TData>({
+        ...getCurrentUserQuery(variables),
         ...options,
         ...queryOptions,
     });
@@ -94,25 +101,19 @@ export const fetchListVotes = (variables: ListVotesVariables, signal?: AbortSign
 /**
  * List all votes.
  */
-export const useListVotes = <TData = ListVotesResponse>(
+export const listVotesQuery = (
     variables: ListVotesVariables,
-    options?: Omit<
-        reactQuery.UseQueryOptions<ListVotesResponse, ListVotesError, TData>,
-        'queryKey' | 'queryFn' | 'initialData'
-    >,
-) => {
-    const { fetcherOptions, queryOptions, queryKeyFn } = usePollsterContext(options);
-    return reactQuery.useQuery<ListVotesResponse, ListVotesError, TData>({
-        queryKey: queryKeyFn({
-            path: '/api/votes/',
-            operationId: 'listVotes',
-            variables,
-        }),
-        queryFn: ({ signal }) => fetchListVotes({ ...fetcherOptions, ...variables }, signal),
-        ...options,
-        ...queryOptions,
-    });
-};
+): {
+    queryKey: reactQuery.QueryKey;
+    queryFn: ({ signal }: { signal?: AbortSignal }) => Promise<ListVotesResponse>;
+} => ({
+    queryKey: queryKeyFn({
+        path: '/api/votes/',
+        operationId: 'listVotes',
+        variables,
+    }),
+    queryFn: ({ signal }: { signal?: AbortSignal }) => fetchListVotes(variables, signal),
+});
 
 /**
  * List all votes.
@@ -124,14 +125,27 @@ export const useSuspenseListVotes = <TData = ListVotesResponse>(
         'queryKey' | 'queryFn' | 'initialData'
     >,
 ) => {
-    const { fetcherOptions, queryOptions, queryKeyFn } = usePollsterContext(options);
+    const { queryOptions } = usePollsterContext(options);
     return reactQuery.useSuspenseQuery<ListVotesResponse, ListVotesError, TData>({
-        queryKey: queryKeyFn({
-            path: '/api/votes/',
-            operationId: 'listVotes',
-            variables,
-        }),
-        queryFn: ({ signal }) => fetchListVotes({ ...fetcherOptions, ...variables }, signal),
+        ...listVotesQuery(variables),
+        ...options,
+        ...queryOptions,
+    });
+};
+
+/**
+ * List all votes.
+ */
+export const useListVotes = <TData = ListVotesResponse>(
+    variables: ListVotesVariables,
+    options?: Omit<
+        reactQuery.UseQueryOptions<ListVotesResponse, ListVotesError, TData>,
+        'queryKey' | 'queryFn' | 'initialData'
+    >,
+) => {
+    const { queryOptions } = usePollsterContext(options);
+    return reactQuery.useQuery<ListVotesResponse, ListVotesError, TData>({
+        ...listVotesQuery(variables),
         ...options,
         ...queryOptions,
     });
@@ -217,25 +231,19 @@ export const fetchGetVote = (variables: GetVoteVariables, signal?: AbortSignal) 
 /**
  * Retrieve a vote by ID.
  */
-export const useGetVote = <TData = Schemas.Vote>(
+export const getVoteQuery = (
     variables: GetVoteVariables,
-    options?: Omit<
-        reactQuery.UseQueryOptions<Schemas.Vote, GetVoteError, TData>,
-        'queryKey' | 'queryFn' | 'initialData'
-    >,
-) => {
-    const { fetcherOptions, queryOptions, queryKeyFn } = usePollsterContext(options);
-    return reactQuery.useQuery<Schemas.Vote, GetVoteError, TData>({
-        queryKey: queryKeyFn({
-            path: '/api/votes/{voteId}',
-            operationId: 'getVote',
-            variables,
-        }),
-        queryFn: ({ signal }) => fetchGetVote({ ...fetcherOptions, ...variables }, signal),
-        ...options,
-        ...queryOptions,
-    });
-};
+): {
+    queryKey: reactQuery.QueryKey;
+    queryFn: ({ signal }: { signal?: AbortSignal }) => Promise<Schemas.Vote>;
+} => ({
+    queryKey: queryKeyFn({
+        path: '/api/votes/{voteId}',
+        operationId: 'getVote',
+        variables,
+    }),
+    queryFn: ({ signal }: { signal?: AbortSignal }) => fetchGetVote(variables, signal),
+});
 
 /**
  * Retrieve a vote by ID.
@@ -247,14 +255,27 @@ export const useSuspenseGetVote = <TData = Schemas.Vote>(
         'queryKey' | 'queryFn' | 'initialData'
     >,
 ) => {
-    const { fetcherOptions, queryOptions, queryKeyFn } = usePollsterContext(options);
+    const { queryOptions } = usePollsterContext(options);
     return reactQuery.useSuspenseQuery<Schemas.Vote, GetVoteError, TData>({
-        queryKey: queryKeyFn({
-            path: '/api/votes/{voteId}',
-            operationId: 'getVote',
-            variables,
-        }),
-        queryFn: ({ signal }) => fetchGetVote({ ...fetcherOptions, ...variables }, signal),
+        ...getVoteQuery(variables),
+        ...options,
+        ...queryOptions,
+    });
+};
+
+/**
+ * Retrieve a vote by ID.
+ */
+export const useGetVote = <TData = Schemas.Vote>(
+    variables: GetVoteVariables,
+    options?: Omit<
+        reactQuery.UseQueryOptions<Schemas.Vote, GetVoteError, TData>,
+        'queryKey' | 'queryFn' | 'initialData'
+    >,
+) => {
+    const { queryOptions } = usePollsterContext(options);
+    return reactQuery.useQuery<Schemas.Vote, GetVoteError, TData>({
+        ...getVoteQuery(variables),
         ...options,
         ...queryOptions,
     });

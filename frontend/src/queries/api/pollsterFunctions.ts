@@ -30,14 +30,17 @@ export const fetchGetCurrentUser = (variables: GetCurrentUserVariables, signal?:
  */
 export const getCurrentUserQuery = (
     variables: GetCurrentUserVariables,
-): [reactQuery.QueryKey, ({ signal }: { signal?: AbortSignal }) => Promise<Schemas.DiscordUser | null>] => [
-    queryKeyFn({
+): {
+    queryKey: reactQuery.QueryKey;
+    queryFn: ({ signal }: { signal?: AbortSignal }) => Promise<Schemas.DiscordUser | null>;
+} => ({
+    queryKey: queryKeyFn({
         path: '/auth/me',
         operationId: 'getCurrentUser',
         variables,
     }),
-    async ({ signal }: { signal?: AbortSignal }) => fetchGetCurrentUser({ ...variables }, signal),
-];
+    queryFn: ({ signal }: { signal?: AbortSignal }) => fetchGetCurrentUser(variables, signal),
+});
 
 export type ListVotesError = Fetcher.ErrorWrapper<{
     status: 401;
@@ -64,14 +67,17 @@ export const fetchListVotes = (variables: ListVotesVariables, signal?: AbortSign
  */
 export const listVotesQuery = (
     variables: ListVotesVariables,
-): [reactQuery.QueryKey, ({ signal }: { signal?: AbortSignal }) => Promise<ListVotesResponse>] => [
-    queryKeyFn({
+): {
+    queryKey: reactQuery.QueryKey;
+    queryFn: ({ signal }: { signal?: AbortSignal }) => Promise<ListVotesResponse>;
+} => ({
+    queryKey: queryKeyFn({
         path: '/api/votes/',
         operationId: 'listVotes',
         variables,
     }),
-    async ({ signal }: { signal?: AbortSignal }) => fetchListVotes({ ...variables }, signal),
-];
+    queryFn: ({ signal }: { signal?: AbortSignal }) => fetchListVotes(variables, signal),
+});
 
 export type GetVotePathParams = {
     voteId: string;
@@ -112,14 +118,17 @@ export const fetchGetVote = (variables: GetVoteVariables, signal?: AbortSignal) 
  */
 export const getVoteQuery = (
     variables: GetVoteVariables,
-): [reactQuery.QueryKey, ({ signal }: { signal?: AbortSignal }) => Promise<Schemas.Vote>] => [
-    queryKeyFn({
+): {
+    queryKey: reactQuery.QueryKey;
+    queryFn: ({ signal }: { signal?: AbortSignal }) => Promise<Schemas.Vote>;
+} => ({
+    queryKey: queryKeyFn({
         path: '/api/votes/{voteId}',
         operationId: 'getVote',
         variables,
     }),
-    async ({ signal }: { signal?: AbortSignal }) => fetchGetVote({ ...variables }, signal),
-];
+    queryFn: ({ signal }: { signal?: AbortSignal }) => fetchGetVote(variables, signal),
+});
 
 export type QueryOperation =
     | {

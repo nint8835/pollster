@@ -24,7 +24,7 @@
     "devDependencies": {
         "@eslint/js": "^9.17.0",
         "@openapi-codegen/cli": "^3.0.1",
-        "@openapi-codegen/typescript": "^8.1.1",
+        "@openapi-codegen/typescript": "^9.0.0",
         "@tanstack/eslint-plugin-query": "^5.64.2",
         "@tanstack/router-devtools": "^1.97.19",
         "@tanstack/router-plugin": "^1.97.19",

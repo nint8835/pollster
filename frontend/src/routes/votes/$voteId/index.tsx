@@ -8,12 +8,10 @@ import { useSuspenseGetVote } from '@/queries/api/pollsterComponents';
 import { getVoteQuery } from '@/queries/api/pollsterFunctions';
 import * as Schemas from '@/queries/api/pollsterSchemas';
 import { queryClient } from '@/queries/client';
-import { convertQueryOpts } from '@/queries/utils';
 
 export const Route = createFileRoute('/votes/$voteId/')({
     component: RouteComponent,
-    loader: ({ params }) =>
-        queryClient.ensureQueryData(convertQueryOpts(getVoteQuery({ pathParams: { voteId: params.voteId } }))),
+    loader: ({ params }) => queryClient.ensureQueryData(getVoteQuery({ pathParams: { voteId: params.voteId } })),
 });
 
 function VoteButton({ vote }: { vote: Schemas.Vote }) {

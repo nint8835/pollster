@@ -26,11 +26,10 @@ import { useCreateVote, useSuspenseListVotes } from '@/queries/api/pollsterCompo
 import { listVotesQuery } from '@/queries/api/pollsterFunctions';
 import { VoteStatus } from '@/queries/api/pollsterSchemas';
 import { queryClient } from '@/queries/client';
-import { convertQueryOpts } from '@/queries/utils';
 
 export const Route = createFileRoute('/')({
     component: RouteComponent,
-    loader: () => queryClient.ensureQueryData(convertQueryOpts(listVotesQuery({}))),
+    loader: () => queryClient.ensureQueryData(listVotesQuery({})),
 });
 
 const columns = [{ name: 'ID' }, { name: 'Name' }, { name: 'Status' }];
@@ -71,7 +70,7 @@ function CreateVoteModal({ isOpen, onOpenChange }: { isOpen: boolean; onOpenChan
                         color="primary"
                         onPress={async () => {
                             const newVote = await createVote({ body: { name } });
-                            queryClient.invalidateQueries({ queryKey: listVotesQuery({})[0] });
+                            queryClient.invalidateQueries(listVotesQuery({}));
                             onOpenChange(false);
                             navigate({ to: '/votes/$voteId/manage', params: { voteId: newVote.id.toString() } });
                         }}
