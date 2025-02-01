@@ -53,7 +53,7 @@ function StatusCell({ status }: { status: PollStatus }) {
     return <Chip {...props[status]} variant="dot" size="sm" />;
 }
 
-function CreateVoteModal({ isOpen, onOpenChange }: { isOpen: boolean; onOpenChange: (isOpen: boolean) => void }) {
+function CreatePollModal({ isOpen, onOpenChange }: { isOpen: boolean; onOpenChange: (isOpen: boolean) => void }) {
     const { mutateAsync: createPoll } = useCreatePoll();
     const [name, setName] = useState('');
     const navigate = useNavigate();
@@ -84,7 +84,7 @@ function CreateVoteModal({ isOpen, onOpenChange }: { isOpen: boolean; onOpenChan
 }
 
 function RouteComponent() {
-    const { data: votes } = useSuspenseListPolls({});
+    const { data: polls } = useSuspenseListPolls({});
     const isOwner = useStore((state) => state.user.is_owner);
     const {
         isOpen: isCreateModalOpen,
@@ -99,7 +99,7 @@ function RouteComponent() {
                     <TableHeader columns={columns}>
                         {(column) => <TableColumn key={column.name}>{column.name}</TableColumn>}
                     </TableHeader>
-                    <TableBody items={votes} emptyContent="No polls found">
+                    <TableBody items={polls} emptyContent="No polls found">
                         {(item) => (
                             <TableRow key={item.id}>
                                 <TableCell>{item.id}</TableCell>
@@ -127,7 +127,7 @@ function RouteComponent() {
                     </div>
                 )}
             </div>
-            <CreateVoteModal isOpen={isCreateModalOpen} onOpenChange={onCreateModalOpenChange} />
+            <CreatePollModal isOpen={isCreateModalOpen} onOpenChange={onCreateModalOpenChange} />
         </>
     );
 }

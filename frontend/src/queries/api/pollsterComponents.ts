@@ -374,7 +374,7 @@ export type EditPollOptionVariables = {
 } & PollsterContext['fetcherOptions'];
 
 /**
- * Edit an option for a vote.
+ * Edit an option for a poll.
  */
 export const fetchEditPollOption = (variables: EditPollOptionVariables, signal?: AbortSignal) =>
     pollsterFetch<Schemas.PollOption, EditPollOptionError, Schemas.EditPollOption, {}, {}, EditPollOptionPathParams>({
@@ -385,7 +385,7 @@ export const fetchEditPollOption = (variables: EditPollOptionVariables, signal?:
     });
 
 /**
- * Edit an option for a vote.
+ * Edit an option for a poll.
  */
 export const useEditPollOption = (
     options?: Omit<

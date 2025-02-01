@@ -105,7 +105,7 @@ async def get_poll(poll_id: str, db: AsyncSession = Depends(get_db)):
     },
 )
 async def create_poll(
-    vote: CreatePoll,
+    poll: CreatePoll,
     db: AsyncSession = Depends(get_db),
     user: DiscordUser = Depends(require_discord_user),
 ):
@@ -120,7 +120,7 @@ async def create_poll(
 
     async with db.begin():
         new_poll = Poll(
-            name=vote.name, status=PollStatus.Pending, owner_id=user.id, options=[]
+            name=poll.name, status=PollStatus.Pending, owner_id=user.id, options=[]
         )
         db.add(new_poll)
         await db.commit()
@@ -156,7 +156,7 @@ async def create_poll_option(
     except ValueError:
         return JSONResponse(
             status_code=status.HTTP_404_NOT_FOUND,
-            content=ErrorResponse(detail="Vote not found.").model_dump(),
+            content=ErrorResponse(detail="Poll not found.").model_dump(),
         )
 
     async with db.begin():
@@ -186,7 +186,7 @@ async def create_poll_option(
                 ).model_dump(),
             )
 
-        new_option = PollOption(vote_id=poll.id, name=option.name)
+        new_option = PollOption(poll_id=poll.id, name=option.name)
         db.add(new_option)
         await db.commit()
 
@@ -215,7 +215,7 @@ async def edit_poll_option(
     db: AsyncSession = Depends(get_db),
     user: DiscordUser = Depends(require_discord_user),
 ):
-    """Edit an option for a vote."""
+    """Edit an option for a poll."""
     try:
         int_poll_id = int(poll_id)
         int_option_id = int(option_id)
@@ -264,7 +264,7 @@ async def edit_poll_option(
         },
         status.HTTP_403_FORBIDDEN: {"description": "Forbidden", "model": ErrorResponse},
         status.HTTP_404_NOT_FOUND: {
-            "description": "Vote or option not found",
+            "description": "Poll or option not found",
             "model": ErrorResponse,
         },
     },
