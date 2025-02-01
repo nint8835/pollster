@@ -4,24 +4,24 @@ import { Edit, Vote } from 'lucide-react';
 
 import { Link } from '@/components/link';
 import { useStore } from '@/lib/state';
-import { useSuspenseGetVote } from '@/queries/api/pollsterComponents';
-import { getVoteQuery } from '@/queries/api/pollsterFunctions';
+import { useSuspenseGetPoll } from '@/queries/api/pollsterComponents';
+import { getPollQuery } from '@/queries/api/pollsterFunctions';
 import * as Schemas from '@/queries/api/pollsterSchemas';
 import { queryClient } from '@/queries/client';
 
-export const Route = createFileRoute('/votes/$voteId/')({
+export const Route = createFileRoute('/polls/$pollId/')({
     component: RouteComponent,
-    loader: ({ params }) => queryClient.ensureQueryData(getVoteQuery({ pathParams: { voteId: params.voteId } })),
+    loader: ({ params }) => queryClient.ensureQueryData(getPollQuery({ pathParams: { pollId: params.pollId } })),
 });
 
-function VoteButton({ vote }: { vote: Schemas.Vote }) {
+function VoteButton({ poll }: { poll: Schemas.Poll }) {
     const InnerButton = () => (
-        <Button startContent={<Vote />} color="primary" isDisabled={vote.status !== Schemas.VoteStatus.open}>
+        <Button startContent={<Vote />} color="primary" isDisabled={poll.status !== Schemas.PollStatus.open}>
             Vote
         </Button>
     );
-    switch (vote.status) {
-        case Schemas.VoteStatus.pending:
+    switch (poll.status) {
+        case Schemas.PollStatus.pending:
             return (
                 <Tooltip content="Voting has not yet started.">
                     <span>
@@ -29,7 +29,7 @@ function VoteButton({ vote }: { vote: Schemas.Vote }) {
                     </span>
                 </Tooltip>
             );
-        case Schemas.VoteStatus.closed:
+        case Schemas.PollStatus.closed:
             return (
                 <Tooltip content="Voting has ended.">
                     <span>
@@ -43,25 +43,25 @@ function VoteButton({ vote }: { vote: Schemas.Vote }) {
 }
 
 function RouteComponent() {
-    const { voteId } = Route.useParams();
-    const { data: vote } = useSuspenseGetVote({ pathParams: { voteId } });
+    const { pollId } = Route.useParams();
+    const { data: poll } = useSuspenseGetPoll({ pathParams: { pollId } });
     const isOwner = useStore((state) => state.user.is_owner);
 
     return (
         <div>
             <Card>
                 <CardHeader>
-                    <h2 className="text-xl font-semibold">{vote.name}</h2>
+                    <h2 className="text-xl font-semibold">{poll.name}</h2>
                 </CardHeader>
                 <CardFooter>
                     <div className="flex w-full justify-end gap-2">
                         {isOwner && (
                             //@ts-ignore - I can't figure out how to get a `Button` with an `as` of a `Link` to work properly
-                            <Button to={'/votes/$voteId/manage'} params={{ voteId }} as={Link} startContent={<Edit />}>
+                            <Button to={'/polls/$pollId/manage'} params={{ pollId }} as={Link} startContent={<Edit />}>
                                 Manage
                             </Button>
                         )}
-                        <VoteButton vote={vote} />
+                        <VoteButton poll={poll} />
                     </div>
                 </CardFooter>
             </Card>

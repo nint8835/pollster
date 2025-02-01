@@ -22,29 +22,29 @@ import { useState } from 'react';
 
 import { Link } from '@/components/link';
 import { useStore } from '@/lib/state';
-import { useCreateVote, useSuspenseListVotes } from '@/queries/api/pollsterComponents';
-import { listVotesQuery } from '@/queries/api/pollsterFunctions';
-import { VoteStatus } from '@/queries/api/pollsterSchemas';
+import { useCreatePoll, useSuspenseListPolls } from '@/queries/api/pollsterComponents';
+import { listPollsQuery } from '@/queries/api/pollsterFunctions';
+import { PollStatus } from '@/queries/api/pollsterSchemas';
 import { queryClient } from '@/queries/client';
 
 export const Route = createFileRoute('/')({
     component: RouteComponent,
-    loader: () => queryClient.ensureQueryData(listVotesQuery({})),
+    loader: () => queryClient.ensureQueryData(listPollsQuery({})),
 });
 
 const columns = [{ name: 'ID' }, { name: 'Name' }, { name: 'Status' }];
 
-function StatusCell({ status }: { status: VoteStatus }) {
-    const props: Record<VoteStatus, Partial<ChipProps>> = {
-        [VoteStatus.pending]: {
+function StatusCell({ status }: { status: PollStatus }) {
+    const props: Record<PollStatus, Partial<ChipProps>> = {
+        [PollStatus.pending]: {
             color: 'warning',
             children: 'Pending',
         },
-        [VoteStatus.open]: {
+        [PollStatus.open]: {
             color: 'success',
             children: 'Open',
         },
-        [VoteStatus.closed]: {
+        [PollStatus.closed]: {
             color: 'danger',
             children: 'Closed',
         },
@@ -54,14 +54,14 @@ function StatusCell({ status }: { status: VoteStatus }) {
 }
 
 function CreateVoteModal({ isOpen, onOpenChange }: { isOpen: boolean; onOpenChange: (isOpen: boolean) => void }) {
-    const { mutateAsync: createVote } = useCreateVote();
+    const { mutateAsync: createPoll } = useCreatePoll();
     const [name, setName] = useState('');
     const navigate = useNavigate();
 
     return (
         <Modal isOpen={isOpen} onOpenChange={onOpenChange} backdrop="blur">
             <ModalContent>
-                <ModalHeader>Create Vote</ModalHeader>
+                <ModalHeader>Create Poll</ModalHeader>
                 <ModalBody>
                     <Input label="Name" value={name} onValueChange={setName} />
                 </ModalBody>
@@ -69,10 +69,10 @@ function CreateVoteModal({ isOpen, onOpenChange }: { isOpen: boolean; onOpenChan
                     <Button
                         color="primary"
                         onPress={async () => {
-                            const newVote = await createVote({ body: { name } });
-                            queryClient.invalidateQueries(listVotesQuery({}));
+                            const newPoll = await createPoll({ body: { name } });
+                            queryClient.invalidateQueries(listPollsQuery({}));
                             onOpenChange(false);
-                            navigate({ to: '/votes/$voteId/manage', params: { voteId: newVote.id.toString() } });
+                            navigate({ to: '/polls/$pollId/manage', params: { pollId: newPoll.id.toString() } });
                         }}
                     >
                         Create
@@ -84,7 +84,7 @@ function CreateVoteModal({ isOpen, onOpenChange }: { isOpen: boolean; onOpenChan
 }
 
 function RouteComponent() {
-    const { data: votes } = useSuspenseListVotes({});
+    const { data: votes } = useSuspenseListPolls({});
     const isOwner = useStore((state) => state.user.is_owner);
     const {
         isOpen: isCreateModalOpen,
@@ -95,18 +95,18 @@ function RouteComponent() {
     return (
         <>
             <div className="space-y-4">
-                <Table aria-label="Table of all votes">
+                <Table aria-label="Table of all polls">
                     <TableHeader columns={columns}>
                         {(column) => <TableColumn key={column.name}>{column.name}</TableColumn>}
                     </TableHeader>
-                    <TableBody items={votes} emptyContent="No votes found">
+                    <TableBody items={votes} emptyContent="No polls found">
                         {(item) => (
                             <TableRow key={item.id}>
                                 <TableCell>{item.id}</TableCell>
                                 <TableCell>
                                     <Link
-                                        to="/votes/$voteId"
-                                        params={{ voteId: item.id.toString() }}
+                                        to="/polls/$pollId"
+                                        params={{ pollId: item.id.toString() }}
                                         color="foreground"
                                     >
                                         {item.name}
@@ -122,7 +122,7 @@ function RouteComponent() {
                 {isOwner && (
                     <div className="flex justify-center">
                         <Button startContent={<Plus />} onPress={onCreateModalOpen}>
-                            Create Vote
+                            Create Poll
                         </Button>
                     </div>
                 )}

@@ -3,17 +3,17 @@
  *
  * @version 0.1.0
  */
-export enum VoteStatus {
+export enum PollStatus {
     pending = 'pending',
     open = 'open',
     closed = 'closed',
 }
 
-export type CreateVote = {
+export type CreatePoll = {
     name: string;
 };
 
-export type CreateVoteOption = {
+export type CreatePollOption = {
     name: string;
 };
 
@@ -23,7 +23,7 @@ export type DiscordUser = {
     is_owner: boolean;
 };
 
-export type EditVoteOption = {
+export type EditPollOption = {
     name: string;
 };
 
@@ -41,21 +41,21 @@ export type HTTPValidationError = {
     detail?: ValidationError[];
 };
 
+export type Poll = {
+    id: number;
+    name: string;
+    status: PollStatus;
+    owner_id: string;
+    options: PollOption[];
+};
+
+export type PollOption = {
+    id: number;
+    name: string;
+};
+
 export type ValidationError = {
     loc: (string | number)[];
     msg: string;
     type: string;
-};
-
-export type Vote = {
-    id: number;
-    name: string;
-    status: VoteStatus;
-    owner_id: string;
-    options: VoteOption[];
-};
-
-export type VoteOption = {
-    id: number;
-    name: string;
 };

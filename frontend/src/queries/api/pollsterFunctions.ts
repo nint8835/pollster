@@ -42,48 +42,48 @@ export const getCurrentUserQuery = (
     queryFn: ({ signal }: { signal?: AbortSignal }) => fetchGetCurrentUser(variables, signal),
 });
 
-export type ListVotesError = Fetcher.ErrorWrapper<{
+export type ListPollsError = Fetcher.ErrorWrapper<{
     status: 401;
     payload: Schemas.ErrorResponse;
 }>;
 
-export type ListVotesResponse = Schemas.Vote[];
+export type ListPollsResponse = Schemas.Poll[];
 
-export type ListVotesVariables = PollsterContext['fetcherOptions'];
+export type ListPollsVariables = PollsterContext['fetcherOptions'];
 
 /**
- * List all votes.
+ * List all polls.
  */
-export const fetchListVotes = (variables: ListVotesVariables, signal?: AbortSignal) =>
-    pollsterFetch<ListVotesResponse, ListVotesError, undefined, {}, {}, {}>({
-        url: '/api/votes/',
+export const fetchListPolls = (variables: ListPollsVariables, signal?: AbortSignal) =>
+    pollsterFetch<ListPollsResponse, ListPollsError, undefined, {}, {}, {}>({
+        url: '/api/polls/',
         method: 'get',
         ...variables,
         signal,
     });
 
 /**
- * List all votes.
+ * List all polls.
  */
-export const listVotesQuery = (
-    variables: ListVotesVariables,
+export const listPollsQuery = (
+    variables: ListPollsVariables,
 ): {
     queryKey: reactQuery.QueryKey;
-    queryFn: ({ signal }: { signal?: AbortSignal }) => Promise<ListVotesResponse>;
+    queryFn: ({ signal }: { signal?: AbortSignal }) => Promise<ListPollsResponse>;
 } => ({
     queryKey: queryKeyFn({
-        path: '/api/votes/',
-        operationId: 'listVotes',
+        path: '/api/polls/',
+        operationId: 'listPolls',
         variables,
     }),
-    queryFn: ({ signal }: { signal?: AbortSignal }) => fetchListVotes(variables, signal),
+    queryFn: ({ signal }: { signal?: AbortSignal }) => fetchListPolls(variables, signal),
 });
 
-export type GetVotePathParams = {
-    voteId: string;
+export type GetPollPathParams = {
+    pollId: string;
 };
 
-export type GetVoteError = Fetcher.ErrorWrapper<
+export type GetPollError = Fetcher.ErrorWrapper<
     | {
           status: 401;
           payload: Schemas.ErrorResponse;
@@ -98,36 +98,36 @@ export type GetVoteError = Fetcher.ErrorWrapper<
       }
 >;
 
-export type GetVoteVariables = {
-    pathParams: GetVotePathParams;
+export type GetPollVariables = {
+    pathParams: GetPollPathParams;
 } & PollsterContext['fetcherOptions'];
 
 /**
- * Retrieve a vote by ID.
+ * Retrieve a poll by ID.
  */
-export const fetchGetVote = (variables: GetVoteVariables, signal?: AbortSignal) =>
-    pollsterFetch<Schemas.Vote, GetVoteError, undefined, {}, {}, GetVotePathParams>({
-        url: '/api/votes/{voteId}',
+export const fetchGetPoll = (variables: GetPollVariables, signal?: AbortSignal) =>
+    pollsterFetch<Schemas.Poll, GetPollError, undefined, {}, {}, GetPollPathParams>({
+        url: '/api/polls/{pollId}',
         method: 'get',
         ...variables,
         signal,
     });
 
 /**
- * Retrieve a vote by ID.
+ * Retrieve a poll by ID.
  */
-export const getVoteQuery = (
-    variables: GetVoteVariables,
+export const getPollQuery = (
+    variables: GetPollVariables,
 ): {
     queryKey: reactQuery.QueryKey;
-    queryFn: ({ signal }: { signal?: AbortSignal }) => Promise<Schemas.Vote>;
+    queryFn: ({ signal }: { signal?: AbortSignal }) => Promise<Schemas.Poll>;
 } => ({
     queryKey: queryKeyFn({
-        path: '/api/votes/{voteId}',
-        operationId: 'getVote',
+        path: '/api/polls/{pollId}',
+        operationId: 'getPoll',
         variables,
     }),
-    queryFn: ({ signal }: { signal?: AbortSignal }) => fetchGetVote(variables, signal),
+    queryFn: ({ signal }: { signal?: AbortSignal }) => fetchGetPoll(variables, signal),
 });
 
 export type QueryOperation =
@@ -137,12 +137,12 @@ export type QueryOperation =
           variables: GetCurrentUserVariables;
       }
     | {
-          path: '/api/votes/';
-          operationId: 'listVotes';
-          variables: ListVotesVariables;
+          path: '/api/polls/';
+          operationId: 'listPolls';
+          variables: ListPollsVariables;
       }
     | {
-          path: '/api/votes/{voteId}';
-          operationId: 'getVote';
-          variables: GetVoteVariables;
+          path: '/api/polls/{pollId}';
+          operationId: 'getPoll';
+          variables: GetPollVariables;
       };

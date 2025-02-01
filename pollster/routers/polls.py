@@ -9,27 +9,27 @@ from sqlalchemy.orm import joinedload
 from pollster.config import config
 from pollster.dependencies.auth import require_discord_user
 from pollster.dependencies.database import get_db
-from pollster.models.vote import Vote, VoteOption, VoteStatus
+from pollster.models.poll import Poll, PollOption, PollStatus
 from pollster.schemas import ErrorResponse
 from pollster.schemas.discord_user import DiscordUser
-from pollster.schemas.votes import (
-    CreateVote,
-    CreateVoteOption,
-    EditVoteOption,
+from pollster.schemas.polls import (
+    CreatePoll,
+    CreatePollOption,
+    EditPollOption,
 )
-from pollster.schemas.votes import (
-    Vote as VoteSchema,
+from pollster.schemas.polls import (
+    Poll as PollSchema,
 )
-from pollster.schemas.votes import (
-    VoteOption as VoteOptionSchema,
+from pollster.schemas.polls import (
+    PollOption as PollOptionSchema,
 )
 
-votes_router = APIRouter(tags=["Votes"], dependencies=[Depends(require_discord_user)])
+polls_router = APIRouter(tags=["Polls"], dependencies=[Depends(require_discord_user)])
 
 
-@votes_router.get(
+@polls_router.get(
     "/",
-    response_model=list[VoteSchema],
+    response_model=list[PollSchema],
     responses={
         status.HTTP_401_UNAUTHORIZED: {
             "description": "Unauthorized",
@@ -37,65 +37,65 @@ votes_router = APIRouter(tags=["Votes"], dependencies=[Depends(require_discord_u
         }
     },
 )
-async def list_votes(db: AsyncSession = Depends(get_db)) -> Sequence[Vote]:
-    """List all votes."""
+async def list_polls(db: AsyncSession = Depends(get_db)) -> Sequence[Poll]:
+    """List all polls."""
     return (
-        (await db.execute(select(Vote).options(joinedload(Vote.options))))
+        (await db.execute(select(Poll).options(joinedload(Poll.options))))
         .unique()
         .scalars()
         .all()
     )
 
 
-@votes_router.get(
-    "/{vote_id}",
-    response_model=VoteSchema,
+@polls_router.get(
+    "/{poll_id}",
+    response_model=PollSchema,
     responses={
         status.HTTP_401_UNAUTHORIZED: {
             "description": "Unauthorized",
             "model": ErrorResponse,
         },
         status.HTTP_404_NOT_FOUND: {
-            "description": "Vote not found",
+            "description": "Poll not found",
             "model": ErrorResponse,
         },
     },
 )
-async def get_vote(vote_id: str, db: AsyncSession = Depends(get_db)):
-    """Retrieve a vote by ID."""
+async def get_poll(poll_id: str, db: AsyncSession = Depends(get_db)):
+    """Retrieve a poll by ID."""
     try:
-        int_vote_id = int(vote_id)
+        int_poll_id = int(poll_id)
     except ValueError:
         return JSONResponse(
             status_code=status.HTTP_404_NOT_FOUND,
-            content=ErrorResponse(detail="Vote not found.").model_dump(),
+            content=ErrorResponse(detail="Poll not found.").model_dump(),
         )
 
-    vote = (
+    poll = (
         (
             await db.execute(
-                select(Vote)
-                .where(Vote.id == int_vote_id)
-                .options(joinedload(Vote.options))
+                select(Poll)
+                .where(Poll.id == int_poll_id)
+                .options(joinedload(Poll.options))
             )
         )
         .unique()
         .scalar_one_or_none()
     )
 
-    if vote is None:
+    if poll is None:
         return JSONResponse(
             status_code=status.HTTP_404_NOT_FOUND,
-            content=ErrorResponse(detail="Vote not found.").model_dump(),
+            content=ErrorResponse(detail="Poll not found.").model_dump(),
         )
 
-    return vote
+    return poll
 
 
-@votes_router.post(
+@polls_router.post(
     "/",
     status_code=status.HTTP_201_CREATED,
-    response_model=VoteSchema,
+    response_model=PollSchema,
     responses={
         status.HTTP_401_UNAUTHORIZED: {
             "description": "Unauthorized",
@@ -104,34 +104,34 @@ async def get_vote(vote_id: str, db: AsyncSession = Depends(get_db)):
         status.HTTP_403_FORBIDDEN: {"description": "Forbidden", "model": ErrorResponse},
     },
 )
-async def create_vote(
-    vote: CreateVote,
+async def create_poll(
+    vote: CreatePoll,
     db: AsyncSession = Depends(get_db),
     user: DiscordUser = Depends(require_discord_user),
 ):
-    """Create a new vote."""
+    """Create a new poll."""
     if user.id != config.owner_id:
         return JSONResponse(
             status_code=status.HTTP_403_FORBIDDEN,
             content=ErrorResponse(
-                detail="You do not have permission to create new votes."
+                detail="You do not have permission to create new polls."
             ).model_dump(),
         )
 
     async with db.begin():
-        new_vote = Vote(
-            name=vote.name, status=VoteStatus.Pending, owner_id=user.id, options=[]
+        new_poll = Poll(
+            name=vote.name, status=PollStatus.Pending, owner_id=user.id, options=[]
         )
-        db.add(new_vote)
+        db.add(new_poll)
         await db.commit()
 
-    return new_vote
+    return new_poll
 
 
-@votes_router.post(
-    "/{vote_id}/options",
+@polls_router.post(
+    "/{poll_id}/options",
     status_code=status.HTTP_201_CREATED,
-    response_model=VoteOptionSchema,
+    response_model=PollOptionSchema,
     responses={
         status.HTTP_401_UNAUTHORIZED: {
             "description": "Unauthorized",
@@ -139,20 +139,20 @@ async def create_vote(
         },
         status.HTTP_403_FORBIDDEN: {"description": "Forbidden", "model": ErrorResponse},
         status.HTTP_404_NOT_FOUND: {
-            "description": "Vote not found",
+            "description": "Poll not found",
             "model": ErrorResponse,
         },
     },
 )
-async def create_vote_option(
-    vote_id: str,
-    option: CreateVoteOption,
+async def create_poll_option(
+    poll_id: str,
+    option: CreatePollOption,
     db: AsyncSession = Depends(get_db),
     user: DiscordUser = Depends(require_discord_user),
 ):
-    """Create a new option for a vote."""
+    """Create a new option for a poll."""
     try:
-        int_vote_id = int(vote_id)
+        int_poll_id = int(poll_id)
     except ValueError:
         return JSONResponse(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -160,42 +160,42 @@ async def create_vote_option(
         )
 
     async with db.begin():
-        vote = (
+        poll = (
             (
                 await db.execute(
-                    select(Vote)
-                    .where(Vote.id == int_vote_id)
-                    .options(joinedload(Vote.options))
+                    select(Poll)
+                    .where(Poll.id == int_poll_id)
+                    .options(joinedload(Poll.options))
                 )
             )
             .unique()
             .scalar_one_or_none()
         )
 
-        if vote is None:
+        if poll is None:
             return JSONResponse(
                 status_code=status.HTTP_404_NOT_FOUND,
-                content=ErrorResponse(detail="Vote not found.").model_dump(),
+                content=ErrorResponse(detail="Poll not found.").model_dump(),
             )
 
         if user.id != config.owner_id:
             return JSONResponse(
                 status_code=status.HTTP_403_FORBIDDEN,
                 content=ErrorResponse(
-                    detail="You do not have permission to create new options for this vote."
+                    detail="You do not have permission to create new options for this poll."
                 ).model_dump(),
             )
 
-        new_option = VoteOption(vote_id=vote.id, name=option.name)
+        new_option = PollOption(vote_id=poll.id, name=option.name)
         db.add(new_option)
         await db.commit()
 
     return new_option
 
 
-@votes_router.patch(
-    "/{vote_id}/options/{option_id}",
-    response_model=VoteOptionSchema,
+@polls_router.patch(
+    "/{poll_id}/options/{option_id}",
+    response_model=PollOptionSchema,
     responses={
         status.HTTP_401_UNAUTHORIZED: {
             "description": "Unauthorized",
@@ -203,41 +203,41 @@ async def create_vote_option(
         },
         status.HTTP_403_FORBIDDEN: {"description": "Forbidden", "model": ErrorResponse},
         status.HTTP_404_NOT_FOUND: {
-            "description": "Vote or option not found",
+            "description": "Poll or option not found",
             "model": ErrorResponse,
         },
     },
 )
-async def edit_vote_option(
-    vote_id: str,
+async def edit_poll_option(
+    poll_id: str,
     option_id: str,
-    option: EditVoteOption,
+    option: EditPollOption,
     db: AsyncSession = Depends(get_db),
     user: DiscordUser = Depends(require_discord_user),
 ):
     """Edit an option for a vote."""
     try:
-        int_vote_id = int(vote_id)
+        int_poll_id = int(poll_id)
         int_option_id = int(option_id)
     except ValueError:
         return JSONResponse(
             status_code=status.HTTP_404_NOT_FOUND,
-            content=ErrorResponse(detail="Vote or option not found.").model_dump(),
+            content=ErrorResponse(detail="Poll or option not found.").model_dump(),
         )
 
     async with db.begin():
         option_model = (
             await db.execute(
-                select(VoteOption)
-                .where(VoteOption.vote_id == int_vote_id)
-                .where(VoteOption.id == int_option_id)
+                select(PollOption)
+                .where(PollOption.poll_id == int_poll_id)
+                .where(PollOption.id == int_option_id)
             )
         ).scalar_one_or_none()
 
         if option_model is None:
             return JSONResponse(
                 status_code=status.HTTP_404_NOT_FOUND,
-                content=ErrorResponse(detail="Vote or option not found.").model_dump(),
+                content=ErrorResponse(detail="Poll or option not found.").model_dump(),
             )
 
         if user.id != config.owner_id:
@@ -254,8 +254,8 @@ async def edit_vote_option(
     return option_model
 
 
-@votes_router.delete(
-    "/{vote_id}/options/{option_id}",
+@polls_router.delete(
+    "/{poll_id}/options/{option_id}",
     status_code=status.HTTP_204_NO_CONTENT,
     responses={
         status.HTTP_401_UNAUTHORIZED: {
@@ -269,35 +269,35 @@ async def edit_vote_option(
         },
     },
 )
-async def delete_vote_option(
-    vote_id: str,
+async def delete_poll_option(
+    poll_id: str,
     option_id: str,
     db: AsyncSession = Depends(get_db),
     user: DiscordUser = Depends(require_discord_user),
 ):
-    """Delete an option for a vote."""
+    """Delete an option for a poll."""
     try:
-        int_vote_id = int(vote_id)
+        int_poll_id = int(poll_id)
         int_option_id = int(option_id)
     except ValueError:
         return JSONResponse(
             status_code=status.HTTP_404_NOT_FOUND,
-            content=ErrorResponse(detail="Vote or option not found.").model_dump(),
+            content=ErrorResponse(detail="Poll or option not found.").model_dump(),
         )
 
     async with db.begin():
         option_model = (
             await db.execute(
-                select(VoteOption)
-                .where(VoteOption.vote_id == int_vote_id)
-                .where(VoteOption.id == int_option_id)
+                select(PollOption)
+                .where(PollOption.poll_id == int_poll_id)
+                .where(PollOption.id == int_option_id)
             )
         ).scalar_one_or_none()
 
         if option_model is None:
             return JSONResponse(
                 status_code=status.HTTP_404_NOT_FOUND,
-                content=ErrorResponse(detail="Vote or option not found.").model_dump(),
+                content=ErrorResponse(detail="Poll or option not found.").model_dump(),
             )
 
         if user.id != config.owner_id:
@@ -312,4 +312,4 @@ async def delete_vote_option(
         await db.commit()
 
 
-__all__ = ["votes_router"]
+__all__ = ["polls_router"]

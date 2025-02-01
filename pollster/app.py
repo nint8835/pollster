@@ -7,7 +7,7 @@ from starlette.responses import Response
 from starlette.types import Scope
 
 from pollster.config import config
-from pollster.routers import auth_router, votes_router
+from pollster.routers import auth_router, polls_router
 
 
 def generate_unique_id(route: APIRoute) -> str:
@@ -33,7 +33,7 @@ app = FastAPI(
 app.add_middleware(SessionMiddleware, secret_key=config.session_secret)
 
 app.include_router(auth_router, prefix="/auth")
-app.include_router(votes_router, prefix="/api/votes")
+app.include_router(polls_router, prefix="/api/polls")
 
 app.mount("/", SPAStaticFiles(directory="frontend/dist", html=True), "frontend")
 
