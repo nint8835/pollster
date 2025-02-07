@@ -5,7 +5,7 @@ import { useState } from 'react';
 
 import { StatusCell } from '@/components/status_cell';
 import { useStore } from '@/lib/state';
-import { useEditPollOption, useSuspenseGetPoll } from '@/queries/api/pollsterComponents';
+import { useCreatePollOption, useEditPollOption, useSuspenseGetPoll } from '@/queries/api/pollsterComponents';
 import { getPollQuery } from '@/queries/api/pollsterFunctions';
 import { queryClient } from '@/queries/client';
 
@@ -26,6 +26,8 @@ function RouteComponent() {
     const { data: poll } = useSuspenseGetPoll({ pathParams: { pollId } });
     const [options, setOptions] = useState<{ id: number; name: string }[]>(poll.options);
     const [newOption, setNewOption] = useState('');
+    const { mutateAsync: createPollOption } = useCreatePollOption();
+    console.log(options);
     return (
         <Card>
             <CardHeader>
@@ -36,7 +38,7 @@ function RouteComponent() {
                 <h3 className="text-lg font-semibold">Options</h3>
                 <div className="flex flex-col gap-2">
                     {options.map((option) => (
-                        <div className="flex gap-2">
+                        <div key={option.id} className="flex gap-2">
                             <Input
                                 // TODO On complete, useEditPollOption
                                 key={option.id}
@@ -66,7 +68,13 @@ function RouteComponent() {
                             }}
                         />
                         <Button color="primary">
-                            <Plus />
+                            <Plus
+                                onClick={async () => {
+                                    await createPollOption({ body: { name: newOption }, pathParams: { pollId } });
+                                    setNewOption('');
+                                    await queryClient.invalidateQueries(getPollQuery({ pathParams: { pollId } }));
+                                }}
+                            />
                         </Button>
                     </div>
                 </div>
