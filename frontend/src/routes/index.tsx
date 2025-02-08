@@ -1,7 +1,5 @@
 import {
     Button,
-    Chip,
-    ChipProps,
     Input,
     Modal,
     ModalBody,
@@ -21,10 +19,10 @@ import { Plus } from 'lucide-react';
 import { useState } from 'react';
 
 import { Link } from '@/components/link';
+import { StatusCell } from '@/components/status_cell';
 import { useStore } from '@/lib/state';
 import { useCreatePoll, useSuspenseListPolls } from '@/queries/api/pollsterComponents';
 import { listPollsQuery } from '@/queries/api/pollsterFunctions';
-import { PollStatus } from '@/queries/api/pollsterSchemas';
 import { queryClient } from '@/queries/client';
 
 export const Route = createFileRoute('/')({
@@ -33,25 +31,6 @@ export const Route = createFileRoute('/')({
 });
 
 const columns = [{ name: 'ID' }, { name: 'Name' }, { name: 'Status' }];
-
-function StatusCell({ status }: { status: PollStatus }) {
-    const props: Record<PollStatus, Partial<ChipProps>> = {
-        [PollStatus.pending]: {
-            color: 'warning',
-            children: 'Pending',
-        },
-        [PollStatus.open]: {
-            color: 'success',
-            children: 'Open',
-        },
-        [PollStatus.closed]: {
-            color: 'danger',
-            children: 'Closed',
-        },
-    };
-
-    return <Chip {...props[status]} variant="dot" size="sm" />;
-}
 
 function CreatePollModal({ isOpen, onOpenChange }: { isOpen: boolean; onOpenChange: (isOpen: boolean) => void }) {
     const { mutateAsync: createPoll } = useCreatePoll();
