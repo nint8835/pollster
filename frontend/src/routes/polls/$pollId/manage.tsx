@@ -1,11 +1,16 @@
 import { Button, Card, CardBody, CardFooter, CardHeader, Input } from '@heroui/react';
 import { createFileRoute } from '@tanstack/react-router';
-import { Plus, Trash, Trash2 } from 'lucide-react';
+import { Plus, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 
 import { StatusCell } from '@/components/status_cell';
 import { useStore } from '@/lib/state';
-import { useCreatePollOption, useEditPollOption, useSuspenseGetPoll } from '@/queries/api/pollsterComponents';
+import {
+    useCreatePollOption,
+    useDeletePollOption,
+    useEditPollOption,
+    useSuspenseGetPoll,
+} from '@/queries/api/pollsterComponents';
 import { getPollQuery } from '@/queries/api/pollsterFunctions';
 import { queryClient } from '@/queries/client';
 
@@ -24,10 +29,34 @@ export const Route = createFileRoute('/polls/$pollId/manage')({
 function RouteComponent() {
     const { pollId } = Route.useParams();
     const { data: poll } = useSuspenseGetPoll({ pathParams: { pollId } });
-    const [options, setOptions] = useState<{ id: number; name: string }[]>(poll.options);
     const [newOption, setNewOption] = useState('');
     const { mutateAsync: createPollOption } = useCreatePollOption();
-    console.log(options);
+    const { mutateAsync: editPollOption } = useEditPollOption();
+    const { mutateAsync: deletePollOption } = useDeletePollOption();
+    const [editingOption, setEditingOption] = useState<{ id: number; name: string } | undefined>(undefined);
+
+    const handleCreatePollOption = async () => {
+        await createPollOption({ body: { name: newOption }, pathParams: { pollId } });
+        setNewOption('');
+        await queryClient.invalidateQueries(getPollQuery({ pathParams: { pollId } }));
+    };
+    const handleEditPollOption = async () => {
+        if (!editingOption) {
+            return;
+        }
+        await editPollOption({
+            body: { name: editingOption.name },
+            pathParams: { pollId, optionId: `${editingOption.id}` },
+        });
+        await queryClient.invalidateQueries(getPollQuery({ pathParams: { pollId } }));
+        setEditingOption(undefined);
+    };
+    const handleDeletePollOption = async (optionId: number) => {
+        console.log(optionId);
+        await deletePollOption({ pathParams: { pollId, optionId: `${optionId}` } });
+        await queryClient.invalidateQueries(getPollQuery({ pathParams: { pollId } }));
+    };
+
     return (
         <Card>
             <CardHeader>
@@ -37,20 +66,15 @@ function RouteComponent() {
             <CardBody>
                 <h3 className="text-lg font-semibold">Options</h3>
                 <div className="flex flex-col gap-2">
-                    {options.map((option) => (
+                    {poll.options.map((option) => (
                         <div key={option.id} className="flex gap-2">
                             <Input
-                                // TODO On complete, useEditPollOption
                                 key={option.id}
-                                value={option.name}
-                                onChange={(e) => {
-                                    const newOptions = [...options];
-                                    newOptions[options.findIndex((o) => o.id === option.id)].name = e.target.value;
-                                    setOptions(newOptions);
-                                }}
+                                value={option.id === editingOption?.id ? editingOption.name : option.name}
+                                onChange={(e) => setEditingOption({ id: option.id, name: e.target.value })}
+                                onBlur={handleEditPollOption}
                             />
-                            <Button color="danger">
-                                {/*TODO On click, useDeletePollOption*/}
+                            <Button onPress={() => handleDeletePollOption(option.id)} color="danger">
                                 <Trash2 />
                             </Button>
                         </div>
@@ -59,22 +83,15 @@ function RouteComponent() {
                         <Input
                             value={newOption}
                             onChange={(e) => setNewOption(e.target.value)}
-                            onKeyDown={(e) => {
-                                // TODO useAddPollOption
-                                if (e.key === 'Enter') {
-                                    setOptions([...options, { id: options.length + 1, name: newOption }]);
-                                    setNewOption('');
+                            onKeyDown={(e) => e.key === 'Enter' && handleCreatePollOption()}
+                            onBlur={(e) => {
+                                if (e.target.value.trim() !== '') {
+                                    handleCreatePollOption();
                                 }
                             }}
                         />
-                        <Button color="primary">
-                            <Plus
-                                onClick={async () => {
-                                    await createPollOption({ body: { name: newOption }, pathParams: { pollId } });
-                                    setNewOption('');
-                                    await queryClient.invalidateQueries(getPollQuery({ pathParams: { pollId } }));
-                                }}
-                            />
+                        <Button onPress={handleCreatePollOption} color="primary">
+                            <Plus />
                         </Button>
                     </div>
                 </div>
