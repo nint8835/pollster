@@ -256,7 +256,9 @@ async def edit_poll_option(
 
 @polls_router.delete(
     "/{poll_id}/options/{option_id}",
-    status_code=status.HTTP_204_NO_CONTENT,
+    # This should be a 204 No Content, but openapi-codegen explodes if it doesn't get back a response body
+    # https://github.com/fabien0102/openapi-codegen/issues/257
+    status_code=status.HTTP_202_ACCEPTED,
     responses={
         status.HTTP_401_UNAUTHORIZED: {
             "description": "Unauthorized",
@@ -310,6 +312,8 @@ async def delete_poll_option(
 
         await db.delete(option_model)
         await db.commit()
+
+    return JSONResponse(status_code=status.HTTP_202_ACCEPTED, content={})
 
 
 __all__ = ["polls_router"]

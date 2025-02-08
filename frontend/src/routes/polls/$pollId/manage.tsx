@@ -52,7 +52,6 @@ function RouteComponent() {
         setEditingOption(undefined);
     };
     const handleDeletePollOption = async (optionId: number) => {
-        console.log(optionId);
         await deletePollOption({ pathParams: { pollId, optionId: `${optionId}` } });
         await queryClient.invalidateQueries(getPollQuery({ pathParams: { pollId } }));
     };

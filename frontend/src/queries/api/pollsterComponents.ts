@@ -432,7 +432,7 @@ export type DeletePollOptionVariables = {
  * Delete an option for a poll.
  */
 export const fetchDeletePollOption = (variables: DeletePollOptionVariables, signal?: AbortSignal) =>
-    pollsterFetch<undefined, DeletePollOptionError, undefined, {}, {}, DeletePollOptionPathParams>({
+    pollsterFetch<void, DeletePollOptionError, undefined, {}, {}, DeletePollOptionPathParams>({
         url: '/api/polls/{pollId}/options/{optionId}',
         method: 'delete',
         ...variables,
@@ -443,13 +443,10 @@ export const fetchDeletePollOption = (variables: DeletePollOptionVariables, sign
  * Delete an option for a poll.
  */
 export const useDeletePollOption = (
-    options?: Omit<
-        reactQuery.UseMutationOptions<undefined, DeletePollOptionError, DeletePollOptionVariables>,
-        'mutationFn'
-    >,
+    options?: Omit<reactQuery.UseMutationOptions<void, DeletePollOptionError, DeletePollOptionVariables>, 'mutationFn'>,
 ) => {
     const { fetcherOptions } = usePollsterContext();
-    return reactQuery.useMutation<undefined, DeletePollOptionError, DeletePollOptionVariables>({
+    return reactQuery.useMutation<void, DeletePollOptionError, DeletePollOptionVariables>({
         mutationFn: (variables: DeletePollOptionVariables) =>
             fetchDeletePollOption({ ...fetcherOptions, ...variables }),
         ...options,
