@@ -281,6 +281,58 @@ export const useGetPoll = <TData = Schemas.Poll>(
     });
 };
 
+export type EditPollPathParams = {
+    pollId: string;
+};
+
+export type EditPollError = Fetcher.ErrorWrapper<
+    | {
+          status: 401;
+          payload: Schemas.ErrorResponse;
+      }
+    | {
+          status: 403;
+          payload: Schemas.ErrorResponse;
+      }
+    | {
+          status: 404;
+          payload: Schemas.ErrorResponse;
+      }
+    | {
+          status: 422;
+          payload: Schemas.HTTPValidationError;
+      }
+>;
+
+export type EditPollVariables = {
+    body?: Schemas.EditPoll;
+    pathParams: EditPollPathParams;
+} & PollsterContext['fetcherOptions'];
+
+/**
+ * Edit a poll.
+ */
+export const fetchEditPoll = (variables: EditPollVariables, signal?: AbortSignal) =>
+    pollsterFetch<Schemas.Poll, EditPollError, Schemas.EditPoll, {}, {}, EditPollPathParams>({
+        url: '/api/polls/{pollId}',
+        method: 'patch',
+        ...variables,
+        signal,
+    });
+
+/**
+ * Edit a poll.
+ */
+export const useEditPoll = (
+    options?: Omit<reactQuery.UseMutationOptions<Schemas.Poll, EditPollError, EditPollVariables>, 'mutationFn'>,
+) => {
+    const { fetcherOptions } = usePollsterContext();
+    return reactQuery.useMutation<Schemas.Poll, EditPollError, EditPollVariables>({
+        mutationFn: (variables: EditPollVariables) => fetchEditPoll({ ...fetcherOptions, ...variables }),
+        ...options,
+    });
+};
+
 export type CreatePollOptionPathParams = {
     pollId: string;
 };

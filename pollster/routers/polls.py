@@ -15,6 +15,7 @@ from pollster.schemas.discord_user import DiscordUser
 from pollster.schemas.polls import (
     CreatePoll,
     CreatePollOption,
+    EditPoll,
     EditPollOption,
 )
 from pollster.schemas.polls import (
@@ -126,6 +127,73 @@ async def create_poll(
         await db.commit()
 
     return new_poll
+
+
+@polls_router.patch(
+    "/{poll_id}",
+    response_model=PollSchema,
+    responses={
+        status.HTTP_401_UNAUTHORIZED: {
+            "description": "Unauthorized",
+            "model": ErrorResponse,
+        },
+        status.HTTP_403_FORBIDDEN: {"description": "Forbidden", "model": ErrorResponse},
+        status.HTTP_404_NOT_FOUND: {
+            "description": "Poll not found",
+            "model": ErrorResponse,
+        },
+    },
+)
+async def edit_poll(
+    poll_id: str,
+    poll: EditPoll,
+    db: AsyncSession = Depends(get_db),
+    user: DiscordUser = Depends(require_discord_user),
+):
+    """Edit a poll."""
+    try:
+        int_poll_id = int(poll_id)
+    except ValueError:
+        return JSONResponse(
+            status_code=status.HTTP_404_NOT_FOUND,
+            content=ErrorResponse(detail="Poll not found.").model_dump(),
+        )
+
+    async with db.begin():
+        poll_model = (
+            (
+                await db.execute(
+                    select(Poll)
+                    .options(joinedload(Poll.options))
+                    .where(Poll.id == int_poll_id)
+                )
+            )
+            .unique()
+            .scalar_one_or_none()
+        )
+
+        if poll_model is None:
+            return JSONResponse(
+                status_code=status.HTTP_404_NOT_FOUND,
+                content=ErrorResponse(detail="Poll not found.").model_dump(),
+            )
+
+        if user.id != config.owner_id:
+            return JSONResponse(
+                status_code=status.HTTP_403_FORBIDDEN,
+                content=ErrorResponse(
+                    detail="You do not have permission to edit this poll."
+                ).model_dump(),
+            )
+
+        if poll.name is not None:
+            poll_model.name = poll.name
+        if poll.status is not None:
+            poll_model.status = poll.status
+
+        await db.commit()
+
+    return poll_model
 
 
 @polls_router.post(

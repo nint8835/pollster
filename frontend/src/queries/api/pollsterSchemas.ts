@@ -23,6 +23,11 @@ export type DiscordUser = {
     is_owner: boolean;
 };
 
+export type EditPoll = {
+    name?: string | null;
+    status?: PollStatus | null;
+};
+
 export type EditPollOption = {
     name: string;
 };

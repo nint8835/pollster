@@ -24,6 +24,11 @@ class CreatePoll(BaseModel):
     name: str
 
 
+class EditPoll(BaseModel):
+    name: str | None = None
+    status: PollStatus | None = None
+
+
 class CreatePollOption(BaseModel):
     name: str
 
@@ -32,4 +37,11 @@ class EditPollOption(BaseModel):
     name: str
 
 
-__all__ = ["Poll", "PollOption", "CreatePoll", "CreatePollOption", "EditPollOption"]
+__all__ = [
+    "Poll",
+    "PollOption",
+    "CreatePoll",
+    "EditPoll",
+    "CreatePollOption",
+    "EditPollOption",
+]
