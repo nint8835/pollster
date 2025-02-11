@@ -1,18 +1,14 @@
-import { Button, Card, CardFooter, CardHeader, Tooltip } from '@heroui/react';
+import { Button, CardFooter, Tooltip } from '@heroui/react';
 import { createFileRoute } from '@tanstack/react-router';
 import { Edit, Vote } from 'lucide-react';
 
 import { Link } from '@/components/link';
-import { StatusCell } from '@/components/status_cell';
 import { useStore } from '@/lib/state';
 import { useSuspenseGetPoll } from '@/queries/api/pollsterComponents';
-import { getPollQuery } from '@/queries/api/pollsterFunctions';
 import * as Schemas from '@/queries/api/pollsterSchemas';
-import { queryClient } from '@/queries/client';
 
 export const Route = createFileRoute('/polls/$pollId/')({
     component: RouteComponent,
-    loader: ({ params }) => queryClient.ensureQueryData(getPollQuery({ pathParams: { pollId: params.pollId } })),
 });
 
 function VoteButton({ poll }: { poll: Schemas.Poll }) {
@@ -49,11 +45,7 @@ function RouteComponent() {
     const isOwner = useStore((state) => state.user.is_owner);
 
     return (
-        <Card>
-            <CardHeader>
-                <h2 className="mr-2 text-xl font-semibold">{poll.name}</h2>
-                <StatusCell status={poll.status} />
-            </CardHeader>
+        <>
             <CardFooter>
                 <div className="flex w-full justify-end gap-2">
                     {isOwner && (
@@ -65,6 +57,6 @@ function RouteComponent() {
                     <VoteButton poll={poll} />
                 </div>
             </CardFooter>
-        </Card>
+        </>
     );
 }

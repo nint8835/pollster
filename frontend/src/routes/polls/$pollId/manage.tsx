@@ -1,9 +1,8 @@
-import { Button, ButtonProps, Card, CardBody, CardFooter, CardHeader, Input } from '@heroui/react';
+import { Button, ButtonProps, CardBody, CardFooter, Input } from '@heroui/react';
 import { createFileRoute } from '@tanstack/react-router';
 import { Plus, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 
-import { StatusCell } from '@/components/status_cell';
 import { useStore } from '@/lib/state';
 import {
     useCreatePollOption,
@@ -25,7 +24,6 @@ export const Route = createFileRoute('/polls/$pollId/manage')({
             throw new Error('You must be the owner to manage a poll');
         }
     },
-    loader: ({ params }) => queryClient.ensureQueryData(getPollQuery({ pathParams: { pollId: params.pollId } })),
 });
 
 function RouteComponent() {
@@ -80,11 +78,7 @@ function RouteComponent() {
     };
 
     return (
-        <Card>
-            <CardHeader>
-                <h2 className="mr-2 text-xl font-semibold">{poll.name}</h2>
-                <StatusCell status={poll.status} />
-            </CardHeader>
+        <>
             <CardBody>
                 <h3 className="text-lg font-semibold">Options</h3>
                 <div className="flex flex-col gap-2">
@@ -125,6 +119,6 @@ function RouteComponent() {
                     )}
                 </div>
             </CardFooter>
-        </Card>
+        </>
     );
 }
