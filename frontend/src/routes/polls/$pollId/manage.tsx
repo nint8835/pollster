@@ -1,4 +1,4 @@
-import { Button, Card, CardBody, CardFooter, CardHeader, Input } from '@heroui/react';
+import { Button, ButtonProps, Card, CardBody, CardFooter, CardHeader, Input } from '@heroui/react';
 import { createFileRoute } from '@tanstack/react-router';
 import { Plus, Trash2 } from 'lucide-react';
 import { useState } from 'react';
@@ -8,10 +8,12 @@ import { useStore } from '@/lib/state';
 import {
     useCreatePollOption,
     useDeletePollOption,
+    useEditPoll,
     useEditPollOption,
     useSuspenseGetPoll,
 } from '@/queries/api/pollsterComponents';
 import { getPollQuery } from '@/queries/api/pollsterFunctions';
+import { PollStatus } from '@/queries/api/pollsterSchemas';
 import { queryClient } from '@/queries/client';
 
 export const Route = createFileRoute('/polls/$pollId/manage')({
@@ -34,6 +36,7 @@ function RouteComponent() {
     const { mutateAsync: editPollOption } = useEditPollOption();
     const { mutateAsync: deletePollOption } = useDeletePollOption();
     const [editingOption, setEditingOption] = useState<{ id: number; name: string } | undefined>(undefined);
+    const { mutateAsync: editPoll } = useEditPoll();
 
     const handleCreatePollOption = async () => {
         await createPollOption({ body: { name: newOption }, pathParams: { pollId } });
@@ -53,6 +56,26 @@ function RouteComponent() {
     };
     const handleDeletePollOption = async (optionId: number) => {
         await deletePollOption({ pathParams: { pollId, optionId: `${optionId}` } });
+        await queryClient.invalidateQueries(getPollQuery({ pathParams: { pollId } }));
+    };
+
+    const nextPollStatus: PollStatus | null = {
+        [PollStatus.pending]: PollStatus.open,
+        [PollStatus.open]: PollStatus.closed,
+        [PollStatus.closed]: null,
+    }[poll.status];
+    const nextPollPropsRecord: Record<PollStatus, Partial<ButtonProps>> = {
+        [PollStatus.pending]: { color: 'primary', children: 'Open Poll' },
+        [PollStatus.open]: { color: 'danger', children: 'Close Poll' },
+        [PollStatus.closed]: {},
+    };
+
+    const handleNextStatus = async () => {
+        if (!nextPollStatus) {
+            return;
+        }
+
+        await editPoll({ body: { status: nextPollStatus }, pathParams: { pollId } });
         await queryClient.invalidateQueries(getPollQuery({ pathParams: { pollId } }));
     };
 
@@ -97,8 +120,9 @@ function RouteComponent() {
             </CardBody>
             <CardFooter>
                 <div className="flex w-full justify-end gap-2">
-                    <Button color="primary">Start Poll</Button>
-                    <Button color="danger">Delete Poll</Button>
+                    {nextPollStatus && (
+                        <Button onPress={handleNextStatus} {...nextPollPropsRecord[poll.status]}></Button>
+                    )}
                 </div>
             </CardFooter>
         </Card>
