@@ -33,7 +33,7 @@ function RouteComponent() {
     const { mutateAsync: createPollOption } = useCreatePollOption();
     const { mutateAsync: editPollOption } = useEditPollOption();
     const { mutateAsync: deletePollOption } = useDeletePollOption();
-    const [editingOption, setEditingOption] = useState<{ id: number; name: string } | undefined>(undefined);
+    const [editingOption, setEditingOption] = useState<{ id: string; name: string } | undefined>(undefined);
     const { mutateAsync: editPoll } = useEditPoll();
 
     const handleCreatePollOption = async () => {
@@ -47,13 +47,13 @@ function RouteComponent() {
         }
         await editPollOption({
             body: { name: editingOption.name },
-            pathParams: { pollId, optionId: `${editingOption.id}` },
+            pathParams: { pollId, optionId: editingOption.id },
         });
         await queryClient.invalidateQueries(getPollQuery({ pathParams: { pollId } }));
         setEditingOption(undefined);
     };
-    const handleDeletePollOption = async (optionId: number) => {
-        await deletePollOption({ pathParams: { pollId, optionId: `${optionId}` } });
+    const handleDeletePollOption = async (optionId: string) => {
+        await deletePollOption({ pathParams: { pollId, optionId: optionId } });
         await queryClient.invalidateQueries(getPollQuery({ pathParams: { pollId } }));
     };
 

@@ -51,7 +51,7 @@ function CreatePollModal({ isOpen, onOpenChange }: { isOpen: boolean; onOpenChan
                             const newPoll = await createPoll({ body: { name } });
                             queryClient.invalidateQueries(listPollsQuery({}));
                             onOpenChange(false);
-                            navigate({ to: '/polls/$pollId/manage', params: { pollId: newPoll.id.toString() } });
+                            navigate({ to: '/polls/$pollId/manage', params: { pollId: newPoll.id } });
                         }}
                     >
                         Create
@@ -83,11 +83,7 @@ function RouteComponent() {
                             <TableRow key={item.id}>
                                 <TableCell>{item.id}</TableCell>
                                 <TableCell>
-                                    <Link
-                                        to="/polls/$pollId"
-                                        params={{ pollId: item.id.toString() }}
-                                        color="foreground"
-                                    >
+                                    <Link to="/polls/$pollId" params={{ pollId: item.id }} color="foreground">
                                         {item.name}
                                     </Link>
                                 </TableCell>

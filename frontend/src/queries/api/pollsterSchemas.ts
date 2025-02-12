@@ -47,7 +47,7 @@ export type HTTPValidationError = {
 };
 
 export type Poll = {
-    id: number;
+    id: string;
     name: string;
     status: PollStatus;
     owner_id: string;
@@ -55,7 +55,7 @@ export type Poll = {
 };
 
 export type PollOption = {
-    id: number;
+    id: string;
     name: string;
 };
 

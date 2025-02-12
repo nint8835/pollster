@@ -4,16 +4,16 @@ from pollster.models.poll import PollStatus
 
 
 class PollOption(BaseModel):
-    model_config = ConfigDict(from_attributes=True)
+    model_config = ConfigDict(from_attributes=True, coerce_numbers_to_str=True)
 
-    id: int
+    id: str
     name: str
 
 
 class Poll(BaseModel):
-    model_config = ConfigDict(from_attributes=True)
+    model_config = ConfigDict(from_attributes=True, coerce_numbers_to_str=True)
 
-    id: int
+    id: str
     name: str
     status: PollStatus
     owner_id: str
