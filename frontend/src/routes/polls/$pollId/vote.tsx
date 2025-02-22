@@ -38,6 +38,13 @@ function VoteInterface({ pollId }: { pollId: string }) {
         };
     }
 
+    function resetVote() {
+        setPendingItems(poll.options.slice(1));
+        setRankedItems([poll.options[0]]);
+        setLow(0);
+        setHigh(0);
+    }
+
     return (
         <>
             <CardBody>
@@ -65,9 +72,8 @@ function VoteInterface({ pollId }: { pollId: string }) {
                         </div>
                     </div>
                 ) : (
-                    <div className="flex w-full justify-end gap-2">
+                    <div className="grid w-full grid-cols-1 gap-2 md:grid-cols-2">
                         <Button
-                            className="w-full"
                             color="primary"
                             onPress={async () => {
                                 await submitVote({
@@ -78,6 +84,9 @@ function VoteInterface({ pollId }: { pollId: string }) {
                             }}
                         >
                             Submit
+                        </Button>
+                        <Button color="danger" onPress={resetVote}>
+                            Restart
                         </Button>
                     </div>
                 )}
