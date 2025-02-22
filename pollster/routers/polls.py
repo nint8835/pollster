@@ -13,6 +13,7 @@ from pollster.models.poll import Poll, PollOption, PollStatus
 from pollster.schemas import ErrorResponse
 from pollster.schemas.discord_user import DiscordUser
 from pollster.schemas.polls import (
+    CanVote,
     CreatePoll,
     CreatePollOption,
     EditPoll,
@@ -194,6 +195,65 @@ async def edit_poll(
         await db.commit()
 
     return poll_model
+
+
+@polls_router.get(
+    "/{poll_id}/can-vote",
+    status_code=status.HTTP_200_OK,
+    response_model=CanVote,
+    responses={
+        status.HTTP_401_UNAUTHORIZED: {
+            "description": "Unauthorized",
+            "model": ErrorResponse,
+        },
+        status.HTTP_404_NOT_FOUND: {
+            "description": "Poll not found",
+            "model": ErrorResponse,
+        },
+    },
+)
+async def can_vote(
+    poll_id: str,
+    db: AsyncSession = Depends(get_db),
+    user: DiscordUser = Depends(require_discord_user),
+):
+    """Check whether the user can vote in a given poll."""
+    try:
+        int_poll_id = int(poll_id)
+    except ValueError:
+        return JSONResponse(
+            status_code=status.HTTP_404_NOT_FOUND,
+            content=ErrorResponse(detail="Poll not found.").model_dump(),
+        )
+
+    poll = (
+        (
+            await db.execute(
+                select(Poll)
+                .where(Poll.id == int_poll_id)
+                .options(joinedload(Poll.options))
+            )
+        )
+        .unique()
+        .scalar_one_or_none()
+    )
+
+    if poll is None:
+        return JSONResponse(
+            status_code=status.HTTP_404_NOT_FOUND,
+            content=ErrorResponse(detail="Poll not found.").model_dump(),
+        )
+
+    if poll.status == PollStatus.Pending:
+        return CanVote(
+            can_vote=False, reason="Voting for this poll has not yet opened."
+        )
+    elif poll.status == PollStatus.Closed:
+        return CanVote(
+            can_vote=False, reason="Voting for this poll has already closed."
+        )
+
+    return CanVote(can_vote=True, reason="")
 
 
 @polls_router.post(

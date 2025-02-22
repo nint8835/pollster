@@ -9,6 +9,11 @@ export enum PollStatus {
     closed = 'closed',
 }
 
+export type CanVote = {
+    can_vote: boolean;
+    reason: string;
+};
+
 export type CreatePoll = {
     name: string;
 };

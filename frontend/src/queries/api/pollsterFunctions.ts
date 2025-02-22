@@ -130,6 +130,57 @@ export const getPollQuery = (
     queryFn: ({ signal }: { signal?: AbortSignal }) => fetchGetPoll(variables, signal),
 });
 
+export type CanVotePathParams = {
+    pollId: string;
+};
+
+export type CanVoteError = Fetcher.ErrorWrapper<
+    | {
+          status: 401;
+          payload: Schemas.ErrorResponse;
+      }
+    | {
+          status: 404;
+          payload: Schemas.ErrorResponse;
+      }
+    | {
+          status: 422;
+          payload: Schemas.HTTPValidationError;
+      }
+>;
+
+export type CanVoteVariables = {
+    pathParams: CanVotePathParams;
+} & PollsterContext['fetcherOptions'];
+
+/**
+ * Check whether the user can vote in a given poll.
+ */
+export const fetchCanVote = (variables: CanVoteVariables, signal?: AbortSignal) =>
+    pollsterFetch<Schemas.CanVote, CanVoteError, undefined, {}, {}, CanVotePathParams>({
+        url: '/api/polls/{pollId}/can-vote',
+        method: 'get',
+        ...variables,
+        signal,
+    });
+
+/**
+ * Check whether the user can vote in a given poll.
+ */
+export const canVoteQuery = (
+    variables: CanVoteVariables,
+): {
+    queryKey: reactQuery.QueryKey;
+    queryFn: ({ signal }: { signal?: AbortSignal }) => Promise<Schemas.CanVote>;
+} => ({
+    queryKey: queryKeyFn({
+        path: '/api/polls/{pollId}/can-vote',
+        operationId: 'canVote',
+        variables,
+    }),
+    queryFn: ({ signal }: { signal?: AbortSignal }) => fetchCanVote(variables, signal),
+});
+
 export type QueryOperation =
     | {
           path: '/auth/me';
@@ -145,4 +196,9 @@ export type QueryOperation =
           path: '/api/polls/{pollId}';
           operationId: 'getPoll';
           variables: GetPollVariables;
+      }
+    | {
+          path: '/api/polls/{pollId}/can-vote';
+          operationId: 'canVote';
+          variables: CanVoteVariables;
       };

@@ -333,6 +333,93 @@ export const useEditPoll = (
     });
 };
 
+export type CanVotePathParams = {
+    pollId: string;
+};
+
+export type CanVoteError = Fetcher.ErrorWrapper<
+    | {
+          status: 401;
+          payload: Schemas.ErrorResponse;
+      }
+    | {
+          status: 404;
+          payload: Schemas.ErrorResponse;
+      }
+    | {
+          status: 422;
+          payload: Schemas.HTTPValidationError;
+      }
+>;
+
+export type CanVoteVariables = {
+    pathParams: CanVotePathParams;
+} & PollsterContext['fetcherOptions'];
+
+/**
+ * Check whether the user can vote in a given poll.
+ */
+export const fetchCanVote = (variables: CanVoteVariables, signal?: AbortSignal) =>
+    pollsterFetch<Schemas.CanVote, CanVoteError, undefined, {}, {}, CanVotePathParams>({
+        url: '/api/polls/{pollId}/can-vote',
+        method: 'get',
+        ...variables,
+        signal,
+    });
+
+/**
+ * Check whether the user can vote in a given poll.
+ */
+export const canVoteQuery = (
+    variables: CanVoteVariables,
+): {
+    queryKey: reactQuery.QueryKey;
+    queryFn: ({ signal }: { signal?: AbortSignal }) => Promise<Schemas.CanVote>;
+} => ({
+    queryKey: queryKeyFn({
+        path: '/api/polls/{pollId}/can-vote',
+        operationId: 'canVote',
+        variables,
+    }),
+    queryFn: ({ signal }: { signal?: AbortSignal }) => fetchCanVote(variables, signal),
+});
+
+/**
+ * Check whether the user can vote in a given poll.
+ */
+export const useSuspenseCanVote = <TData = Schemas.CanVote>(
+    variables: CanVoteVariables,
+    options?: Omit<
+        reactQuery.UseQueryOptions<Schemas.CanVote, CanVoteError, TData>,
+        'queryKey' | 'queryFn' | 'initialData'
+    >,
+) => {
+    const { queryOptions } = usePollsterContext(options);
+    return reactQuery.useSuspenseQuery<Schemas.CanVote, CanVoteError, TData>({
+        ...canVoteQuery(variables),
+        ...options,
+        ...queryOptions,
+    });
+};
+
+/**
+ * Check whether the user can vote in a given poll.
+ */
+export const useCanVote = <TData = Schemas.CanVote>(
+    variables: CanVoteVariables,
+    options?: Omit<
+        reactQuery.UseQueryOptions<Schemas.CanVote, CanVoteError, TData>,
+        'queryKey' | 'queryFn' | 'initialData'
+    >,
+) => {
+    const { queryOptions } = usePollsterContext(options);
+    return reactQuery.useQuery<Schemas.CanVote, CanVoteError, TData>({
+        ...canVoteQuery(variables),
+        ...options,
+        ...queryOptions,
+    });
+};
+
 export type CreatePollOptionPathParams = {
     pollId: string;
 };
@@ -520,4 +607,9 @@ export type QueryOperation =
           path: '/api/polls/{pollId}';
           operationId: 'getPoll';
           variables: GetPollVariables;
+      }
+    | {
+          path: '/api/polls/{pollId}/can-vote';
+          operationId: 'canVote';
+          variables: CanVoteVariables;
       };

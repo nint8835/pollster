@@ -4,39 +4,35 @@ import { Edit, Vote } from 'lucide-react';
 
 import { Link } from '@/components/link';
 import { useStore } from '@/lib/state';
-import { useSuspenseGetPoll } from '@/queries/api/pollsterComponents';
+import { canVoteQuery, useSuspenseCanVote, useSuspenseGetPoll } from '@/queries/api/pollsterComponents';
 import * as Schemas from '@/queries/api/pollsterSchemas';
+import { queryClient } from '@/queries/client';
 
 export const Route = createFileRoute('/polls/$pollId/')({
     component: RouteComponent,
+    loader: ({ params }) => queryClient.ensureQueryData(canVoteQuery({ pathParams: { pollId: params.pollId } })),
 });
 
 function VoteButton({ poll }: { poll: Schemas.Poll }) {
+    const { data: canVote } = useSuspenseCanVote({ pathParams: { pollId: poll.id } });
+
     const InnerButton = () => (
-        <Button startContent={<Vote />} color="primary" isDisabled={poll.status !== Schemas.PollStatus.open}>
+        <Button startContent={<Vote />} color="primary" isDisabled={!canVote.can_vote}>
             Vote
         </Button>
     );
-    switch (poll.status) {
-        case Schemas.PollStatus.pending:
-            return (
-                <Tooltip content="Voting has not yet started.">
-                    <span>
-                        <InnerButton />
-                    </span>
-                </Tooltip>
-            );
-        case Schemas.PollStatus.closed:
-            return (
-                <Tooltip content="Voting has ended.">
-                    <span>
-                        <InnerButton />
-                    </span>
-                </Tooltip>
-            );
-        default:
-            return <InnerButton />;
+
+    if (canVote.can_vote) {
+        return <InnerButton />;
     }
+
+    return (
+        <Tooltip content={canVote.reason}>
+            <span>
+                <InnerButton />
+            </span>
+        </Tooltip>
+    );
 }
 
 function RouteComponent() {

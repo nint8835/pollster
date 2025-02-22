@@ -37,6 +37,11 @@ class EditPollOption(BaseModel):
     name: str
 
 
+class CanVote(BaseModel):
+    can_vote: bool
+    reason: str
+
+
 __all__ = [
     "Poll",
     "PollOption",
@@ -44,4 +49,5 @@ __all__ = [
     "EditPoll",
     "CreatePollOption",
     "EditPollOption",
+    "CanVote",
 ]
