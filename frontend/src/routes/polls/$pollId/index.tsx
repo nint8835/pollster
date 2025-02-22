@@ -17,7 +17,15 @@ function VoteButton({ poll }: { poll: Schemas.Poll }) {
     const { data: canVote } = useSuspenseCanVote({ pathParams: { pollId: poll.id } });
 
     const InnerButton = () => (
-        <Button startContent={<Vote />} color="primary" isDisabled={!canVote.can_vote}>
+        <Button
+            to={'/polls/$pollId/vote'}
+            //@ts-ignore - I can't figure out how to get a `Button` with an `as` of a `Link` to work properly
+            params={{ pollId: poll.id }}
+            as={Link}
+            startContent={<Vote />}
+            color="primary"
+            isDisabled={!canVote.can_vote}
+        >
             Vote
         </Button>
     );
@@ -45,8 +53,13 @@ function RouteComponent() {
             <CardFooter>
                 <div className="flex w-full justify-end gap-2">
                     {isOwner && (
-                        //@ts-ignore - I can't figure out how to get a `Button` with an `as` of a `Link` to work properly
-                        <Button to={'/polls/$pollId/manage'} params={{ pollId }} as={Link} startContent={<Edit />}>
+                        <Button
+                            to={'/polls/$pollId/manage'}
+                            //@ts-ignore - I can't figure out how to get a `Button` with an `as` of a `Link` to work properly
+                            params={{ pollId }}
+                            as={Link}
+                            startContent={<Edit />}
+                        >
                             Manage
                         </Button>
                     )}

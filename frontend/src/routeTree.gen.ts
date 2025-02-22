@@ -15,6 +15,7 @@ import { Route as IndexImport } from './routes/index'
 import { Route as PollsPollIdImport } from './routes/polls/$pollId'
 import { Route as AuthLoginImport } from './routes/auth/login'
 import { Route as PollsPollIdIndexImport } from './routes/polls/$pollId/index'
+import { Route as PollsPollIdVoteImport } from './routes/polls/$pollId/vote'
 import { Route as PollsPollIdManageImport } from './routes/polls/$pollId/manage'
 
 // Create/Update Routes
@@ -40,6 +41,12 @@ const AuthLoginRoute = AuthLoginImport.update({
 const PollsPollIdIndexRoute = PollsPollIdIndexImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => PollsPollIdRoute,
+} as any)
+
+const PollsPollIdVoteRoute = PollsPollIdVoteImport.update({
+  id: '/vote',
+  path: '/vote',
   getParentRoute: () => PollsPollIdRoute,
 } as any)
 
@@ -81,6 +88,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PollsPollIdManageImport
       parentRoute: typeof PollsPollIdImport
     }
+    '/polls/$pollId/vote': {
+      id: '/polls/$pollId/vote'
+      path: '/vote'
+      fullPath: '/polls/$pollId/vote'
+      preLoaderRoute: typeof PollsPollIdVoteImport
+      parentRoute: typeof PollsPollIdImport
+    }
     '/polls/$pollId/': {
       id: '/polls/$pollId/'
       path: '/'
@@ -95,11 +109,13 @@ declare module '@tanstack/react-router' {
 
 interface PollsPollIdRouteChildren {
   PollsPollIdManageRoute: typeof PollsPollIdManageRoute
+  PollsPollIdVoteRoute: typeof PollsPollIdVoteRoute
   PollsPollIdIndexRoute: typeof PollsPollIdIndexRoute
 }
 
 const PollsPollIdRouteChildren: PollsPollIdRouteChildren = {
   PollsPollIdManageRoute: PollsPollIdManageRoute,
+  PollsPollIdVoteRoute: PollsPollIdVoteRoute,
   PollsPollIdIndexRoute: PollsPollIdIndexRoute,
 }
 
@@ -112,6 +128,7 @@ export interface FileRoutesByFullPath {
   '/auth/login': typeof AuthLoginRoute
   '/polls/$pollId': typeof PollsPollIdRouteWithChildren
   '/polls/$pollId/manage': typeof PollsPollIdManageRoute
+  '/polls/$pollId/vote': typeof PollsPollIdVoteRoute
   '/polls/$pollId/': typeof PollsPollIdIndexRoute
 }
 
@@ -119,6 +136,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth/login': typeof AuthLoginRoute
   '/polls/$pollId/manage': typeof PollsPollIdManageRoute
+  '/polls/$pollId/vote': typeof PollsPollIdVoteRoute
   '/polls/$pollId': typeof PollsPollIdIndexRoute
 }
 
@@ -128,6 +146,7 @@ export interface FileRoutesById {
   '/auth/login': typeof AuthLoginRoute
   '/polls/$pollId': typeof PollsPollIdRouteWithChildren
   '/polls/$pollId/manage': typeof PollsPollIdManageRoute
+  '/polls/$pollId/vote': typeof PollsPollIdVoteRoute
   '/polls/$pollId/': typeof PollsPollIdIndexRoute
 }
 
@@ -138,15 +157,22 @@ export interface FileRouteTypes {
     | '/auth/login'
     | '/polls/$pollId'
     | '/polls/$pollId/manage'
+    | '/polls/$pollId/vote'
     | '/polls/$pollId/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth/login' | '/polls/$pollId/manage' | '/polls/$pollId'
+  to:
+    | '/'
+    | '/auth/login'
+    | '/polls/$pollId/manage'
+    | '/polls/$pollId/vote'
+    | '/polls/$pollId'
   id:
     | '__root__'
     | '/'
     | '/auth/login'
     | '/polls/$pollId'
     | '/polls/$pollId/manage'
+    | '/polls/$pollId/vote'
     | '/polls/$pollId/'
   fileRoutesById: FileRoutesById
 }
@@ -188,11 +214,16 @@ export const routeTree = rootRoute
       "filePath": "polls/$pollId.tsx",
       "children": [
         "/polls/$pollId/manage",
+        "/polls/$pollId/vote",
         "/polls/$pollId/"
       ]
     },
     "/polls/$pollId/manage": {
       "filePath": "polls/$pollId/manage.tsx",
+      "parent": "/polls/$pollId"
+    },
+    "/polls/$pollId/vote": {
+      "filePath": "polls/$pollId/vote.tsx",
       "parent": "/polls/$pollId"
     },
     "/polls/$pollId/": {
