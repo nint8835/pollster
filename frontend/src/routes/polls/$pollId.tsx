@@ -1,5 +1,5 @@
 import { Card, CardHeader } from '@heroui/react';
-import { Outlet, createFileRoute } from '@tanstack/react-router';
+import { Link, Outlet, createFileRoute } from '@tanstack/react-router';
 
 import { StatusCell } from '@/components/status_cell';
 import { useSuspenseGetPoll } from '@/queries/api/pollsterComponents';
@@ -18,7 +18,9 @@ function RouteComponent() {
     return (
         <Card>
             <CardHeader>
-                <h2 className="mr-2 text-xl font-semibold">{poll.name}</h2>
+                <Link to="/polls/$pollId" params={{ pollId }}>
+                    <h2 className="mr-2 text-xl font-semibold">{poll.name}</h2>
+                </Link>
                 <StatusCell status={poll.status} />
             </CardHeader>
             <Outlet />
