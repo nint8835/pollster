@@ -1,3 +1,4 @@
+import json
 from typing import Sequence
 
 from fastapi import APIRouter, Depends, status
@@ -9,7 +10,7 @@ from sqlalchemy.orm import joinedload
 from pollster.config import config
 from pollster.dependencies.auth import require_discord_user
 from pollster.dependencies.database import get_db
-from pollster.models.poll import Poll, PollOption, PollStatus
+from pollster.models.poll import Poll, PollOption, PollStatus, Vote
 from pollster.schemas import ErrorResponse
 from pollster.schemas.discord_user import DiscordUser
 from pollster.schemas.polls import (
@@ -253,7 +254,121 @@ async def can_vote(
             can_vote=False, reason="Voting for this poll has already closed."
         )
 
+    existing_vote = (
+        await db.execute(select(Vote).filter_by(poll_id=poll.id, user_id=user.id))
+    ).scalar_one_or_none()
+
+    if existing_vote is not None:
+        return CanVote(can_vote=False, reason="You have already voted in this poll.")
+
     return CanVote(can_vote=True, reason="")
+
+
+@polls_router.post(
+    "/{poll_id}/votes",
+    status_code=status.HTTP_201_CREATED,
+    responses={
+        status.HTTP_400_BAD_REQUEST: {
+            "description": "Bad Request",
+            "model": ErrorResponse,
+        },
+        status.HTTP_401_UNAUTHORIZED: {
+            "description": "Unauthorized",
+            "model": ErrorResponse,
+        },
+        status.HTTP_404_NOT_FOUND: {
+            "description": "Poll not found",
+            "model": ErrorResponse,
+        },
+        status.HTTP_409_CONFLICT: {
+            "description": "Conflict",
+            "model": ErrorResponse,
+        },
+    },
+)
+async def create_vote(
+    poll_id: str,
+    vote: list[str],
+    db: AsyncSession = Depends(get_db),
+    user: DiscordUser = Depends(require_discord_user),
+):
+    """Create a new vote for a poll."""
+    try:
+        int_poll_id = int(poll_id)
+    except ValueError:
+        return JSONResponse(
+            status_code=status.HTTP_404_NOT_FOUND,
+            content=ErrorResponse(detail="Poll not found.").model_dump(),
+        )
+
+    try:
+        parsed_vote = [int(v) for v in vote]
+    except ValueError:
+        return JSONResponse(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            content=ErrorResponse(detail="Invalid vote.").model_dump(),
+        )
+
+    async with db.begin():
+        poll = (
+            (
+                await db.execute(
+                    select(Poll)
+                    .where(Poll.id == int_poll_id)
+                    .options(joinedload(Poll.options))
+                )
+            )
+            .unique()
+            .scalar_one_or_none()
+        )
+
+        if poll is None:
+            return JSONResponse(
+                status_code=status.HTTP_404_NOT_FOUND,
+                content=ErrorResponse(detail="Poll not found.").model_dump(),
+            )
+
+        if poll.status == PollStatus.Pending:
+            return JSONResponse(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                content=ErrorResponse(
+                    detail="Voting for this poll has not yet opened."
+                ).model_dump(),
+            )
+        elif poll.status == PollStatus.Closed:
+            return JSONResponse(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                content=ErrorResponse(
+                    detail="Voting for this poll has already closed."
+                ).model_dump(),
+            )
+
+        existing_vote = (
+            await db.execute(select(Vote).filter_by(poll_id=poll.id, user_id=user.id))
+        ).scalar_one_or_none()
+
+        if existing_vote is not None:
+            return JSONResponse(
+                status_code=status.HTTP_409_CONFLICT,
+                content=ErrorResponse(
+                    detail="You have already voted in this poll."
+                ).model_dump(),
+            )
+
+        vote_set = set(parsed_vote)
+        option_set = set([o.id for o in poll.options])
+
+        if vote_set != option_set or len(vote_set) != len(parsed_vote):
+            return JSONResponse(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                content=ErrorResponse(detail="Invalid vote.").model_dump(),
+            )
+
+        new_vote = Vote(poll_id=poll.id, user_id=user.id, vote=json.dumps(parsed_vote))
+        db.add(new_vote)
+        await db.commit()
+
+    return JSONResponse(status_code=status.HTTP_201_CREATED, content={})
 
 
 @polls_router.post(

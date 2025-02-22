@@ -36,4 +36,14 @@ class PollOption(Base):
     poll: Mapped[Poll] = relationship(back_populates="options", lazy="raise")
 
 
-__all__ = ["Poll", "PollStatus", "PollOption"]
+class Vote(Base):
+    __tablename__ = "votes"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    poll_id: Mapped[int] = mapped_column(ForeignKey("polls.id"))
+    user_id: Mapped[str]
+    vote: Mapped[str]
+    poll: Mapped[Poll] = relationship(lazy="raise")
+
+
+__all__ = ["Poll", "PollStatus", "PollOption", "Vote"]

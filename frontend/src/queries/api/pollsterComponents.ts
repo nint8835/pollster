@@ -420,6 +420,64 @@ export const useCanVote = <TData = Schemas.CanVote>(
     });
 };
 
+export type CreateVotePathParams = {
+    pollId: string;
+};
+
+export type CreateVoteError = Fetcher.ErrorWrapper<
+    | {
+          status: 400;
+          payload: Schemas.ErrorResponse;
+      }
+    | {
+          status: 401;
+          payload: Schemas.ErrorResponse;
+      }
+    | {
+          status: 404;
+          payload: Schemas.ErrorResponse;
+      }
+    | {
+          status: 409;
+          payload: Schemas.ErrorResponse;
+      }
+    | {
+          status: 422;
+          payload: Schemas.HTTPValidationError;
+      }
+>;
+
+export type CreateVoteRequestBody = string[];
+
+export type CreateVoteVariables = {
+    body?: CreateVoteRequestBody;
+    pathParams: CreateVotePathParams;
+} & PollsterContext['fetcherOptions'];
+
+/**
+ * Create a new vote for a poll.
+ */
+export const fetchCreateVote = (variables: CreateVoteVariables, signal?: AbortSignal) =>
+    pollsterFetch<void, CreateVoteError, CreateVoteRequestBody, {}, {}, CreateVotePathParams>({
+        url: '/api/polls/{pollId}/votes',
+        method: 'post',
+        ...variables,
+        signal,
+    });
+
+/**
+ * Create a new vote for a poll.
+ */
+export const useCreateVote = (
+    options?: Omit<reactQuery.UseMutationOptions<void, CreateVoteError, CreateVoteVariables>, 'mutationFn'>,
+) => {
+    const { fetcherOptions } = usePollsterContext();
+    return reactQuery.useMutation<void, CreateVoteError, CreateVoteVariables>({
+        mutationFn: (variables: CreateVoteVariables) => fetchCreateVote({ ...fetcherOptions, ...variables }),
+        ...options,
+    });
+};
+
 export type CreatePollOptionPathParams = {
     pollId: string;
 };
