@@ -73,6 +73,9 @@ function VoteInterface({ pollId }: { pollId: string }) {
                     </div>
                 ) : (
                     <div className="grid w-full grid-cols-1 gap-2 md:grid-cols-2">
+                        <Button color="danger" onPress={resetVote}>
+                            Restart
+                        </Button>
                         <Button
                             color="primary"
                             onPress={async () => {
@@ -84,9 +87,6 @@ function VoteInterface({ pollId }: { pollId: string }) {
                             }}
                         >
                             Submit
-                        </Button>
-                        <Button color="danger" onPress={resetVote}>
-                            Restart
                         </Button>
                     </div>
                 )}
