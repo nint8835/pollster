@@ -16,6 +16,7 @@ import { Route as PollsPollIdImport } from './routes/polls/$pollId'
 import { Route as AuthLoginImport } from './routes/auth/login'
 import { Route as PollsPollIdIndexImport } from './routes/polls/$pollId/index'
 import { Route as PollsPollIdVoteImport } from './routes/polls/$pollId/vote'
+import { Route as PollsPollIdResultsImport } from './routes/polls/$pollId/results'
 import { Route as PollsPollIdManageImport } from './routes/polls/$pollId/manage'
 
 // Create/Update Routes
@@ -47,6 +48,12 @@ const PollsPollIdIndexRoute = PollsPollIdIndexImport.update({
 const PollsPollIdVoteRoute = PollsPollIdVoteImport.update({
   id: '/vote',
   path: '/vote',
+  getParentRoute: () => PollsPollIdRoute,
+} as any)
+
+const PollsPollIdResultsRoute = PollsPollIdResultsImport.update({
+  id: '/results',
+  path: '/results',
   getParentRoute: () => PollsPollIdRoute,
 } as any)
 
@@ -88,6 +95,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PollsPollIdManageImport
       parentRoute: typeof PollsPollIdImport
     }
+    '/polls/$pollId/results': {
+      id: '/polls/$pollId/results'
+      path: '/results'
+      fullPath: '/polls/$pollId/results'
+      preLoaderRoute: typeof PollsPollIdResultsImport
+      parentRoute: typeof PollsPollIdImport
+    }
     '/polls/$pollId/vote': {
       id: '/polls/$pollId/vote'
       path: '/vote'
@@ -109,12 +123,14 @@ declare module '@tanstack/react-router' {
 
 interface PollsPollIdRouteChildren {
   PollsPollIdManageRoute: typeof PollsPollIdManageRoute
+  PollsPollIdResultsRoute: typeof PollsPollIdResultsRoute
   PollsPollIdVoteRoute: typeof PollsPollIdVoteRoute
   PollsPollIdIndexRoute: typeof PollsPollIdIndexRoute
 }
 
 const PollsPollIdRouteChildren: PollsPollIdRouteChildren = {
   PollsPollIdManageRoute: PollsPollIdManageRoute,
+  PollsPollIdResultsRoute: PollsPollIdResultsRoute,
   PollsPollIdVoteRoute: PollsPollIdVoteRoute,
   PollsPollIdIndexRoute: PollsPollIdIndexRoute,
 }
@@ -128,6 +144,7 @@ export interface FileRoutesByFullPath {
   '/auth/login': typeof AuthLoginRoute
   '/polls/$pollId': typeof PollsPollIdRouteWithChildren
   '/polls/$pollId/manage': typeof PollsPollIdManageRoute
+  '/polls/$pollId/results': typeof PollsPollIdResultsRoute
   '/polls/$pollId/vote': typeof PollsPollIdVoteRoute
   '/polls/$pollId/': typeof PollsPollIdIndexRoute
 }
@@ -136,6 +153,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth/login': typeof AuthLoginRoute
   '/polls/$pollId/manage': typeof PollsPollIdManageRoute
+  '/polls/$pollId/results': typeof PollsPollIdResultsRoute
   '/polls/$pollId/vote': typeof PollsPollIdVoteRoute
   '/polls/$pollId': typeof PollsPollIdIndexRoute
 }
@@ -146,6 +164,7 @@ export interface FileRoutesById {
   '/auth/login': typeof AuthLoginRoute
   '/polls/$pollId': typeof PollsPollIdRouteWithChildren
   '/polls/$pollId/manage': typeof PollsPollIdManageRoute
+  '/polls/$pollId/results': typeof PollsPollIdResultsRoute
   '/polls/$pollId/vote': typeof PollsPollIdVoteRoute
   '/polls/$pollId/': typeof PollsPollIdIndexRoute
 }
@@ -157,6 +176,7 @@ export interface FileRouteTypes {
     | '/auth/login'
     | '/polls/$pollId'
     | '/polls/$pollId/manage'
+    | '/polls/$pollId/results'
     | '/polls/$pollId/vote'
     | '/polls/$pollId/'
   fileRoutesByTo: FileRoutesByTo
@@ -164,6 +184,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth/login'
     | '/polls/$pollId/manage'
+    | '/polls/$pollId/results'
     | '/polls/$pollId/vote'
     | '/polls/$pollId'
   id:
@@ -172,6 +193,7 @@ export interface FileRouteTypes {
     | '/auth/login'
     | '/polls/$pollId'
     | '/polls/$pollId/manage'
+    | '/polls/$pollId/results'
     | '/polls/$pollId/vote'
     | '/polls/$pollId/'
   fileRoutesById: FileRoutesById
@@ -214,12 +236,17 @@ export const routeTree = rootRoute
       "filePath": "polls/$pollId.tsx",
       "children": [
         "/polls/$pollId/manage",
+        "/polls/$pollId/results",
         "/polls/$pollId/vote",
         "/polls/$pollId/"
       ]
     },
     "/polls/$pollId/manage": {
       "filePath": "polls/$pollId/manage.tsx",
+      "parent": "/polls/$pollId"
+    },
+    "/polls/$pollId/results": {
+      "filePath": "polls/$pollId/results.tsx",
       "parent": "/polls/$pollId"
     },
     "/polls/$pollId/vote": {

@@ -2,8 +2,7 @@ import { Card, CardHeader } from '@heroui/react';
 import { Link, Outlet, createFileRoute } from '@tanstack/react-router';
 
 import { StatusCell } from '@/components/status_cell';
-import { useSuspenseGetPoll } from '@/queries/api/pollsterComponents';
-import { getPollQuery } from '@/queries/api/pollsterFunctions';
+import { getPollQuery, useSuspenseGetPoll } from '@/queries/api/pollsterComponents';
 import { queryClient } from '@/queries/client';
 
 export const Route = createFileRoute('/polls/$pollId')({

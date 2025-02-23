@@ -21,8 +21,7 @@ import { useState } from 'react';
 import { Link } from '@/components/link';
 import { StatusCell } from '@/components/status_cell';
 import { useStore } from '@/lib/state';
-import { useCreatePoll, useSuspenseListPolls } from '@/queries/api/pollsterComponents';
-import { listPollsQuery } from '@/queries/api/pollsterFunctions';
+import { listPollsQuery, useCreatePoll, useSuspenseListPolls } from '@/queries/api/pollsterComponents';
 import { queryClient } from '@/queries/client';
 
 export const Route = createFileRoute('/')({

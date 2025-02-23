@@ -6,13 +6,13 @@ import { useState } from 'react';
 import { useStore } from '@/lib/state';
 import { pluralize } from '@/lib/utils';
 import {
+    getPollQuery,
     useCreatePollOption,
     useDeletePollOption,
     useEditPoll,
     useEditPollOption,
     useSuspenseGetPoll,
 } from '@/queries/api/pollsterComponents';
-import { getPollQuery } from '@/queries/api/pollsterFunctions';
 import { PollStatus } from '@/queries/api/pollsterSchemas';
 import { queryClient } from '@/queries/client';
 

@@ -1,9 +1,5 @@
 import { defineConfig } from '@openapi-codegen/cli';
-import {
-    generateReactQueryComponents,
-    generateReactQueryFunctions,
-    generateSchemaTypes,
-} from '@openapi-codegen/typescript';
+import { generateReactQueryComponents, generateSchemaTypes } from '@openapi-codegen/typescript';
 
 export default defineConfig({
     pollster: {
@@ -19,12 +15,6 @@ export default defineConfig({
                 useEnums: true,
             });
             await generateReactQueryComponents(context, {
-                filenamePrefix,
-                schemasFiles,
-                generateSuspenseQueries: true,
-                useEnums: true,
-            });
-            await generateReactQueryFunctions(context, {
                 filenamePrefix,
                 schemasFiles,
                 useEnums: true,
