@@ -4,6 +4,7 @@ import { Plus, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 
 import { useStore } from '@/lib/state';
+import { pluralize } from '@/lib/utils';
 import {
     useCreatePollOption,
     useDeletePollOption,
@@ -26,6 +27,14 @@ export const Route = createFileRoute('/polls/$pollId/manage')({
     },
 });
 
+function requiredComparisons(itemCount: number): number {
+    if (itemCount < 2) {
+        return 0;
+    }
+
+    return Math.log2(itemCount) + requiredComparisons(itemCount - 1);
+}
+
 function RouteComponent() {
     const { pollId } = Route.useParams();
     const { data: poll } = useSuspenseGetPoll({ pathParams: { pollId } });
@@ -35,6 +44,8 @@ function RouteComponent() {
     const { mutateAsync: deletePollOption } = useDeletePollOption();
     const [editingOption, setEditingOption] = useState<{ id: string; name: string } | undefined>(undefined);
     const { mutateAsync: editPoll } = useEditPoll();
+
+    const requiredComparisonCount = requiredComparisons(poll.options.length);
 
     const handleCreatePollOption = async () => {
         await createPollOption({ body: { name: newOption }, pathParams: { pollId } });
@@ -113,7 +124,11 @@ function RouteComponent() {
                 </div>
             </CardBody>
             <CardFooter>
-                <div className="flex w-full justify-end gap-2">
+                <div className="flex w-full items-center justify-between gap-2">
+                    <div className="italic text-zinc-400">
+                        Voters will be required to complete approximately {requiredComparisonCount.toLocaleString()}{' '}
+                        {pluralize(requiredComparisonCount, 'comparison', 'comparisons')}.
+                    </div>
                     {nextPollStatus && (
                         <Button onPress={handleNextStatus} {...nextPollPropsRecord[poll.status]}></Button>
                     )}

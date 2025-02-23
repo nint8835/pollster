@@ -1,4 +1,4 @@
-import { Button, CardBody, CardFooter } from '@heroui/react';
+import { Button, CardBody, CardFooter, cn } from '@heroui/react';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useState } from 'react';
 
@@ -21,7 +21,7 @@ function VoteInterface({ pollId }: { pollId: string }) {
     const [rankedItems, setRankedItems] = useState<PollOption[]>([poll.options[0]]);
 
     const [low, setLow] = useState(0);
-    const [high, setHigh] = useState(0);
+    const [high, setHigh] = useState(1);
     const mid = Math.floor((low + high) / 2);
 
     function handleVote(setter: (value: number) => void, value: number, low: number, high: number) {
@@ -42,7 +42,7 @@ function VoteInterface({ pollId }: { pollId: string }) {
         setPendingItems(poll.options.slice(1));
         setRankedItems([poll.options[0]]);
         setLow(0);
-        setHigh(0);
+        setHigh(1);
     }
 
     return (
@@ -50,9 +50,24 @@ function VoteInterface({ pollId }: { pollId: string }) {
             <CardBody>
                 <div>
                     <ol className="list-inside list-decimal">
-                        {[...rankedItems].reverse().map((i) => (
-                            <li key={i.id}>{i.name}</li>
-                        ))}
+                        {rankedItems
+                            .map((item, index) => [item, index] as [PollOption | null, number])
+                            .reverse()
+                            .concat(
+                                new Array(poll.options.length - rankedItems.length)
+                                    .fill(null)
+                                    .map((_, index) => [null, rankedItems.length + index]),
+                            )
+                            .map(([item, index]) => (
+                                <li
+                                    className={cn(
+                                        item === null && 'italic text-zinc-400',
+                                        index < low || index >= high ? 'opacity-50' : 'opacity-100',
+                                    )}
+                                >
+                                    {item && item.name}
+                                </li>
+                            ))}
                     </ol>
                 </div>
             </CardBody>
@@ -72,22 +87,27 @@ function VoteInterface({ pollId }: { pollId: string }) {
                         </div>
                     </div>
                 ) : (
-                    <div className="grid w-full grid-cols-1 gap-2 md:grid-cols-2">
-                        <Button color="danger" onPress={resetVote}>
-                            Restart
-                        </Button>
-                        <Button
-                            color="primary"
-                            onPress={async () => {
-                                await submitVote({
-                                    pathParams: { pollId },
-                                    body: rankedItems.map((i) => i.id),
-                                });
-                                navigate({ to: '/polls/$pollId', params: { pollId } });
-                            }}
-                        >
-                            Submit
-                        </Button>
+                    <div className="flex w-full flex-col gap-2">
+                        <div className="text-center italic text-zinc-400">
+                            Ranking complete. Review your vote above and submit when ready.
+                        </div>
+                        <div className="grid w-full grid-cols-1 gap-2 md:grid-cols-2">
+                            <Button color="danger" onPress={resetVote}>
+                                Restart
+                            </Button>
+                            <Button
+                                color="primary"
+                                onPress={async () => {
+                                    await submitVote({
+                                        pathParams: { pollId },
+                                        body: rankedItems.map((i) => i.id),
+                                    });
+                                    navigate({ to: '/polls/$pollId', params: { pollId } });
+                                }}
+                            >
+                                Submit
+                            </Button>
+                        </div>
                     </div>
                 )}
             </CardFooter>
