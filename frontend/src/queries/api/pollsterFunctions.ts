@@ -181,6 +181,63 @@ export const canVoteQuery = (
     queryFn: ({ signal }: { signal?: AbortSignal }) => fetchCanVote(variables, signal),
 });
 
+export type ListVotesPathParams = {
+    pollId: string;
+};
+
+export type ListVotesError = Fetcher.ErrorWrapper<
+    | {
+          status: 401;
+          payload: Schemas.ErrorResponse;
+      }
+    | {
+          status: 403;
+          payload: Schemas.ErrorResponse;
+      }
+    | {
+          status: 404;
+          payload: Schemas.ErrorResponse;
+      }
+    | {
+          status: 422;
+          payload: Schemas.HTTPValidationError;
+      }
+>;
+
+export type ListVotesResponse = string[][];
+
+export type ListVotesVariables = {
+    pathParams: ListVotesPathParams;
+} & PollsterContext['fetcherOptions'];
+
+/**
+ * List all votes for a poll.
+ */
+export const fetchListVotes = (variables: ListVotesVariables, signal?: AbortSignal) =>
+    pollsterFetch<ListVotesResponse, ListVotesError, undefined, {}, {}, ListVotesPathParams>({
+        url: '/api/polls/{pollId}/votes',
+        method: 'get',
+        ...variables,
+        signal,
+    });
+
+/**
+ * List all votes for a poll.
+ */
+export const listVotesQuery = (
+    variables: ListVotesVariables,
+): {
+    queryKey: reactQuery.QueryKey;
+    queryFn: ({ signal }: { signal?: AbortSignal }) => Promise<ListVotesResponse>;
+} => ({
+    queryKey: queryKeyFn({
+        path: '/api/polls/{pollId}/votes',
+        operationId: 'listVotes',
+        variables,
+    }),
+    queryFn: ({ signal }: { signal?: AbortSignal }) => fetchListVotes(variables, signal),
+});
+
 export type QueryOperation =
     | {
           path: '/auth/me';
@@ -201,4 +258,9 @@ export type QueryOperation =
           path: '/api/polls/{pollId}/can-vote';
           operationId: 'canVote';
           variables: CanVoteVariables;
+      }
+    | {
+          path: '/api/polls/{pollId}/votes';
+          operationId: 'listVotes';
+          variables: ListVotesVariables;
       };

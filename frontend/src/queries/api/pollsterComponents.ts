@@ -478,6 +478,99 @@ export const useCreateVote = (
     });
 };
 
+export type ListVotesPathParams = {
+    pollId: string;
+};
+
+export type ListVotesError = Fetcher.ErrorWrapper<
+    | {
+          status: 401;
+          payload: Schemas.ErrorResponse;
+      }
+    | {
+          status: 403;
+          payload: Schemas.ErrorResponse;
+      }
+    | {
+          status: 404;
+          payload: Schemas.ErrorResponse;
+      }
+    | {
+          status: 422;
+          payload: Schemas.HTTPValidationError;
+      }
+>;
+
+export type ListVotesResponse = string[][];
+
+export type ListVotesVariables = {
+    pathParams: ListVotesPathParams;
+} & PollsterContext['fetcherOptions'];
+
+/**
+ * List all votes for a poll.
+ */
+export const fetchListVotes = (variables: ListVotesVariables, signal?: AbortSignal) =>
+    pollsterFetch<ListVotesResponse, ListVotesError, undefined, {}, {}, ListVotesPathParams>({
+        url: '/api/polls/{pollId}/votes',
+        method: 'get',
+        ...variables,
+        signal,
+    });
+
+/**
+ * List all votes for a poll.
+ */
+export const listVotesQuery = (
+    variables: ListVotesVariables,
+): {
+    queryKey: reactQuery.QueryKey;
+    queryFn: ({ signal }: { signal?: AbortSignal }) => Promise<ListVotesResponse>;
+} => ({
+    queryKey: queryKeyFn({
+        path: '/api/polls/{pollId}/votes',
+        operationId: 'listVotes',
+        variables,
+    }),
+    queryFn: ({ signal }: { signal?: AbortSignal }) => fetchListVotes(variables, signal),
+});
+
+/**
+ * List all votes for a poll.
+ */
+export const useSuspenseListVotes = <TData = ListVotesResponse>(
+    variables: ListVotesVariables,
+    options?: Omit<
+        reactQuery.UseQueryOptions<ListVotesResponse, ListVotesError, TData>,
+        'queryKey' | 'queryFn' | 'initialData'
+    >,
+) => {
+    const { queryOptions } = usePollsterContext(options);
+    return reactQuery.useSuspenseQuery<ListVotesResponse, ListVotesError, TData>({
+        ...listVotesQuery(variables),
+        ...options,
+        ...queryOptions,
+    });
+};
+
+/**
+ * List all votes for a poll.
+ */
+export const useListVotes = <TData = ListVotesResponse>(
+    variables: ListVotesVariables,
+    options?: Omit<
+        reactQuery.UseQueryOptions<ListVotesResponse, ListVotesError, TData>,
+        'queryKey' | 'queryFn' | 'initialData'
+    >,
+) => {
+    const { queryOptions } = usePollsterContext(options);
+    return reactQuery.useQuery<ListVotesResponse, ListVotesError, TData>({
+        ...listVotesQuery(variables),
+        ...options,
+        ...queryOptions,
+    });
+};
+
 export type CreatePollOptionPathParams = {
     pollId: string;
 };
@@ -670,4 +763,9 @@ export type QueryOperation =
           path: '/api/polls/{pollId}/can-vote';
           operationId: 'canVote';
           variables: CanVoteVariables;
+      }
+    | {
+          path: '/api/polls/{pollId}/votes';
+          operationId: 'listVotes';
+          variables: ListVotesVariables;
       };

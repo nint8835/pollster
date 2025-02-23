@@ -371,6 +371,69 @@ async def create_vote(
     return JSONResponse(status_code=status.HTTP_201_CREATED, content={})
 
 
+@polls_router.get(
+    "/{poll_id}/votes",
+    response_model=list[list[str]],
+    responses={
+        status.HTTP_401_UNAUTHORIZED: {
+            "description": "Unauthorized",
+            "model": ErrorResponse,
+        },
+        status.HTTP_403_FORBIDDEN: {"description": "Forbidden", "model": ErrorResponse},
+        status.HTTP_404_NOT_FOUND: {
+            "description": "Poll not found",
+            "model": ErrorResponse,
+        },
+    },
+)
+async def list_votes(
+    poll_id: str,
+    db: AsyncSession = Depends(get_db),
+    user: DiscordUser = Depends(require_discord_user),
+):
+    """List all votes for a poll."""
+    try:
+        int_poll_id = int(poll_id)
+    except ValueError:
+        return JSONResponse(
+            status_code=status.HTTP_404_NOT_FOUND,
+            content=ErrorResponse(detail="Poll not found.").model_dump(),
+        )
+
+    async with db.begin():
+        poll = (
+            (
+                await db.execute(
+                    select(Poll)
+                    .where(Poll.id == int_poll_id)
+                    .options(joinedload(Poll.options))
+                )
+            )
+            .unique()
+            .scalar_one_or_none()
+        )
+
+        if poll is None:
+            return JSONResponse(
+                status_code=status.HTTP_404_NOT_FOUND,
+                content=ErrorResponse(detail="Poll not found.").model_dump(),
+            )
+
+        if user.id != config.owner_id:
+            return JSONResponse(
+                status_code=status.HTTP_403_FORBIDDEN,
+                content=ErrorResponse(
+                    detail="You do not have permission to view votes for this poll."
+                ).model_dump(),
+            )
+
+        votes = (
+            (await db.execute(select(Vote).filter_by(poll_id=poll.id))).scalars().all()
+        )
+
+    return [[str(v) for v in json.loads(vote.vote)] for vote in votes]
+
+
 @polls_router.post(
     "/{poll_id}/options",
     status_code=status.HTTP_201_CREATED,
