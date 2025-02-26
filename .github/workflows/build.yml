@@ -1,0 +1,16 @@
+name: Build Docker image
+
+on:
+    push:
+        branches:
+            - main
+
+permissions:
+    contents: read
+    packages: write
+
+jobs:
+    build:
+        uses: nint8835/workflows/.github/workflows/earthly-build.yaml@main
+        with:
+            target: +app

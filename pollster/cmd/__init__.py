@@ -8,7 +8,7 @@ import uvicorn
 from pollster.config import config
 
 structlog.stdlib.recreate_defaults(log_level=logging.WARNING)
-structlog.stdlib.get_logger("shopkeeper").setLevel(
+structlog.stdlib.get_logger("pollster").setLevel(
     logging.getLevelNamesMapping()[config.log_level]
 )
 
