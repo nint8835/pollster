@@ -33,11 +33,7 @@ function RouteComponent() {
     const { data: votes } = useSuspenseListVotes({ pathParams: { pollId } }, { refetchInterval: 5000 });
 
     const scores = poll.options
-        .map((option) => ({
-            id: option.id,
-            name: option.name,
-            points: votes.map((vote) => vote.indexOf(option.id) + 1).reduce((acc, cur) => acc + cur, 0),
-        }))
+        .map((option) => ({ id: option.id, name: option.name, points: votes[option.id] }))
         .sort((a, b) => b.points - a.points);
 
     return (

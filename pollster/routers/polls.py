@@ -373,7 +373,7 @@ async def create_vote(
 
 @polls_router.get(
     "/{poll_id}/votes",
-    response_model=list[list[str]],
+    response_model=dict[str, int],
     responses={
         status.HTTP_401_UNAUTHORIZED: {
             "description": "Unauthorized",
@@ -391,7 +391,7 @@ async def list_votes(
     db: AsyncSession = Depends(get_db),
     user: DiscordUser = Depends(require_discord_user),
 ):
-    """List all votes for a poll."""
+    """List vote results for a poll."""
     try:
         int_poll_id = int(poll_id)
     except ValueError:
@@ -431,7 +431,14 @@ async def list_votes(
             (await db.execute(select(Vote).filter_by(poll_id=poll.id))).scalars().all()
         )
 
-    return [[str(v) for v in json.loads(vote.vote)] for vote in votes]
+    option_points = {str(option.id): 0 for option in poll.options}
+
+    parsed_votes = [[str(v) for v in json.loads(vote.vote)] for vote in votes]
+    for vote in parsed_votes:
+        for i, option_id in enumerate(vote):
+            option_points[option_id] += i + 1
+
+    return option_points
 
 
 @polls_router.post(

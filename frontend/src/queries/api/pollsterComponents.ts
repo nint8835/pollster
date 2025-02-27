@@ -501,14 +501,16 @@ export type ListVotesError = Fetcher.ErrorWrapper<
       }
 >;
 
-export type ListVotesResponse = string[][];
+export type ListVotesResponse = {
+    [key: string]: number;
+};
 
 export type ListVotesVariables = {
     pathParams: ListVotesPathParams;
 } & PollsterContext['fetcherOptions'];
 
 /**
- * List all votes for a poll.
+ * List vote results for a poll.
  */
 export const fetchListVotes = (variables: ListVotesVariables, signal?: AbortSignal) =>
     pollsterFetch<ListVotesResponse, ListVotesError, undefined, {}, {}, ListVotesPathParams>({
@@ -519,7 +521,7 @@ export const fetchListVotes = (variables: ListVotesVariables, signal?: AbortSign
     });
 
 /**
- * List all votes for a poll.
+ * List vote results for a poll.
  */
 export const listVotesQuery = (
     variables: ListVotesVariables,
@@ -536,7 +538,7 @@ export const listVotesQuery = (
 });
 
 /**
- * List all votes for a poll.
+ * List vote results for a poll.
  */
 export const useSuspenseListVotes = <TData = ListVotesResponse>(
     variables: ListVotesVariables,
@@ -554,7 +556,7 @@ export const useSuspenseListVotes = <TData = ListVotesResponse>(
 };
 
 /**
- * List all votes for a poll.
+ * List vote results for a poll.
  */
 export const useListVotes = <TData = ListVotesResponse>(
     variables: ListVotesVariables,
