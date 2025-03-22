@@ -18,6 +18,7 @@ class Poll(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str]
     status: Mapped[PollStatus]
+    allow_users_to_view_results: Mapped[bool]
 
     owner_id: Mapped[str]
 

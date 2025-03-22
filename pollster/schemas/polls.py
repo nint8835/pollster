@@ -16,6 +16,7 @@ class Poll(BaseModel):
     id: str
     name: str
     status: PollStatus
+    allow_users_to_view_results: bool
     owner_id: str
     options: list[PollOption]
 
@@ -27,6 +28,7 @@ class CreatePoll(BaseModel):
 class EditPoll(BaseModel):
     name: str | None = None
     status: PollStatus | None = None
+    allow_users_to_view_results: bool | None = None
 
 
 class CreatePollOption(BaseModel):

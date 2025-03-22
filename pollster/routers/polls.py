@@ -192,6 +192,8 @@ async def edit_poll(
             poll_model.name = poll.name
         if poll.status is not None:
             poll_model.status = poll.status
+        if poll.allow_users_to_view_results is not None:
+            poll_model.allow_users_to_view_results = poll.allow_users_to_view_results
 
         await db.commit()
 
@@ -419,7 +421,10 @@ async def list_votes(
                 content=ErrorResponse(detail="Poll not found.").model_dump(),
             )
 
-        if user.id not in [poll.owner_id, config.owner_id]:
+        if (
+            user.id not in [poll.owner_id, config.owner_id]
+            and not poll.allow_users_to_view_results
+        ):
             return JSONResponse(
                 status_code=status.HTTP_403_FORBIDDEN,
                 content=ErrorResponse(

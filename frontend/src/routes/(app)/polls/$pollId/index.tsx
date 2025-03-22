@@ -50,32 +50,33 @@ function RouteComponent() {
   const { data: poll } = useSuspenseGetPoll({ pathParams: { pollId } });
   const userId = useStore((state) => state.user.id);
   const isOwner = useStore((state) => state.user.is_owner);
+  const canManage = poll.owner_id === userId || isOwner;
 
   return (
     <>
       <CardFooter>
         <div className="flex w-full justify-end gap-2">
-          {(poll.owner_id === userId || isOwner) && (
-            <>
-              <Button
-                to={'/polls/$pollId/results'}
-                //@ts-ignore - I can't figure out how to get a `Button` with an `as` of a `Link` to work properly
-                params={{ pollId }}
-                as={Link}
-                startContent={<ChartColumnDecreasing />}
-              >
-                Results
-              </Button>
-              <Button
-                to={'/polls/$pollId/manage'}
-                //@ts-ignore - I can't figure out how to get a `Button` with an `as` of a `Link` to work properly
-                params={{ pollId }}
-                as={Link}
-                startContent={<Edit />}
-              >
-                Manage
-              </Button>
-            </>
+          {(poll.allow_users_to_view_results || canManage) && (
+            <Button
+              to={'/polls/$pollId/results'}
+              //@ts-ignore - I can't figure out how to get a `Button` with an `as` of a `Link` to work properly
+              params={{ pollId }}
+              as={Link}
+              startContent={<ChartColumnDecreasing />}
+            >
+              Results
+            </Button>
+          )}
+          {canManage && (
+            <Button
+              to={'/polls/$pollId/manage'}
+              //@ts-ignore - I can't figure out how to get a `Button` with an `as` of a `Link` to work properly
+              params={{ pollId }}
+              as={Link}
+              startContent={<Edit />}
+            >
+              Manage
+            </Button>
           )}
           <VoteButton poll={poll} />
         </div>

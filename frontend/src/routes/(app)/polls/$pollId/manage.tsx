@@ -1,4 +1,4 @@
-import { Button, ButtonProps, CardBody, CardFooter, Input } from '@heroui/react';
+import { Button, ButtonProps, CardBody, CardFooter, Checkbox, Input } from '@heroui/react';
 import { createFileRoute } from '@tanstack/react-router';
 import { Plus, Trash2 } from 'lucide-react';
 import { useState } from 'react';
@@ -62,6 +62,13 @@ function RouteComponent() {
     await deletePollOption({ pathParams: { pollId, optionId: optionId } });
     await queryClient.invalidateQueries(getPollQuery({ pathParams: { pollId } }));
   };
+  const handleToggleAllowUsersToViewResults = async () => {
+    await editPoll({
+      body: { allow_users_to_view_results: !poll.allow_users_to_view_results },
+      pathParams: { pollId },
+    });
+    await queryClient.invalidateQueries(getPollQuery({ pathParams: { pollId } }));
+  };
 
   const nextPollStatus: PollStatus | null = {
     [PollStatus.pending]: PollStatus.open,
@@ -85,7 +92,7 @@ function RouteComponent() {
 
   return (
     <>
-      <CardBody>
+      <CardBody className="space-y-2">
         <h3 className="text-lg font-semibold">Options</h3>
         <div className="flex flex-col gap-2">
           {poll.options.map((option) => (
@@ -117,6 +124,9 @@ function RouteComponent() {
             </Button>
           </div>
         </div>
+        <Checkbox isSelected={poll.allow_users_to_view_results} onChange={handleToggleAllowUsersToViewResults}>
+          Allow users to view results
+        </Checkbox>
       </CardBody>
       <CardFooter>
         <div className="flex w-full items-center justify-between gap-2">

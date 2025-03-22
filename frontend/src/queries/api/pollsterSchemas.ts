@@ -31,6 +31,7 @@ export type DiscordUser = {
 export type EditPoll = {
   name?: string | null;
   status?: PollStatus | null;
+  allow_users_to_view_results?: boolean | null;
 };
 
 export type EditPollOption = {
@@ -55,6 +56,7 @@ export type Poll = {
   id: string;
   name: string;
   status: PollStatus;
+  allow_users_to_view_results: boolean;
   owner_id: string;
   options: PollOption[];
 };
