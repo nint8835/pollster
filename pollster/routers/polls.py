@@ -180,7 +180,7 @@ async def edit_poll(
                 content=ErrorResponse(detail="Poll not found.").model_dump(),
             )
 
-        if user.id != config.owner_id:
+        if user.id not in [poll_model.owner_id, config.owner_id]:
             return JSONResponse(
                 status_code=status.HTTP_403_FORBIDDEN,
                 content=ErrorResponse(
@@ -419,7 +419,7 @@ async def list_votes(
                 content=ErrorResponse(detail="Poll not found.").model_dump(),
             )
 
-        if user.id != config.owner_id:
+        if user.id not in [poll.owner_id, config.owner_id]:
             return JSONResponse(
                 status_code=status.HTTP_403_FORBIDDEN,
                 content=ErrorResponse(
@@ -491,7 +491,7 @@ async def create_poll_option(
                 content=ErrorResponse(detail="Poll not found.").model_dump(),
             )
 
-        if user.id != config.owner_id:
+        if user.id not in [poll.owner_id, config.owner_id]:
             return JSONResponse(
                 status_code=status.HTTP_403_FORBIDDEN,
                 content=ErrorResponse(
@@ -542,6 +542,7 @@ async def edit_poll_option(
         option_model = (
             await db.execute(
                 select(PollOption)
+                .options(joinedload(PollOption.poll))
                 .where(PollOption.poll_id == int_poll_id)
                 .where(PollOption.id == int_option_id)
             )
@@ -553,7 +554,7 @@ async def edit_poll_option(
                 content=ErrorResponse(detail="Poll or option not found.").model_dump(),
             )
 
-        if user.id != config.owner_id:
+        if user.id not in [option_model.poll.owner_id, config.owner_id]:
             return JSONResponse(
                 status_code=status.HTTP_403_FORBIDDEN,
                 content=ErrorResponse(
@@ -604,6 +605,7 @@ async def delete_poll_option(
         option_model = (
             await db.execute(
                 select(PollOption)
+                .options(joinedload(PollOption.poll))
                 .where(PollOption.poll_id == int_poll_id)
                 .where(PollOption.id == int_option_id)
             )
@@ -615,7 +617,7 @@ async def delete_poll_option(
                 content=ErrorResponse(detail="Poll or option not found.").model_dump(),
             )
 
-        if user.id != config.owner_id:
+        if user.id not in [option_model.poll.owner_id, config.owner_id]:
             return JSONResponse(
                 status_code=status.HTTP_403_FORBIDDEN,
                 content=ErrorResponse(

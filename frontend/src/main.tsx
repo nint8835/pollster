@@ -8,34 +8,34 @@ import { queryClient } from './queries/client';
 import { routeTree } from './routeTree.gen';
 
 function LoadingSpinner() {
-    return (
-        <div className="flex h-full flex-grow items-center justify-center">
-            <Spinner size="lg" />
-        </div>
-    );
+  return (
+    <div className="flex h-full flex-grow items-center justify-center">
+      <Spinner size="lg" />
+    </div>
+  );
 }
 
 const router = createRouter({
-    routeTree,
-    defaultPreload: 'intent',
-    defaultPreloadStaleTime: 0,
-    defaultPendingComponent: LoadingSpinner,
+  routeTree,
+  defaultPreload: 'intent',
+  defaultPreloadStaleTime: 0,
+  defaultPendingComponent: LoadingSpinner,
 });
 
 declare module '@tanstack/react-router' {
-    interface Register {
-        router: typeof router;
-    }
+  interface Register {
+    router: typeof router;
+  }
 }
 
 const rootElement = document.getElementById('root')!;
 if (!rootElement.innerHTML) {
-    const root = ReactDOM.createRoot(rootElement);
-    root.render(
-        <StrictMode>
-            <QueryClientProvider client={queryClient}>
-                <RouterProvider router={router} />
-            </QueryClientProvider>
-        </StrictMode>,
-    );
+  const root = ReactDOM.createRoot(rootElement);
+  root.render(
+    <StrictMode>
+      <QueryClientProvider client={queryClient}>
+        <RouterProvider router={router} />
+      </QueryClientProvider>
+    </StrictMode>,
+  );
 }

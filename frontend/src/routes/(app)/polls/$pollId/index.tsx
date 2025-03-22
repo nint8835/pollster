@@ -1,29 +1,22 @@
-import { Button, CardFooter, Tooltip } from '@heroui/react'
-import { createFileRoute } from '@tanstack/react-router'
-import { ChartColumnDecreasing, Edit, Vote } from 'lucide-react'
+import { Button, CardFooter, Tooltip } from '@heroui/react';
+import { createFileRoute } from '@tanstack/react-router';
+import { ChartColumnDecreasing, Edit, Vote } from 'lucide-react';
 
-import { Link } from '@/components/link'
-import { useStore } from '@/lib/state'
-import {
-  canVoteQuery,
-  useSuspenseCanVote,
-  useSuspenseGetPoll,
-} from '@/queries/api/pollsterComponents'
-import * as Schemas from '@/queries/api/pollsterSchemas'
-import { queryClient } from '@/queries/client'
+import { Link } from '@/components/link';
+import { useStore } from '@/lib/state';
+import { canVoteQuery, useSuspenseCanVote, useSuspenseGetPoll } from '@/queries/api/pollsterComponents';
+import * as Schemas from '@/queries/api/pollsterSchemas';
+import { queryClient } from '@/queries/client';
 
 export const Route = createFileRoute('/(app)/polls/$pollId/')({
   component: RouteComponent,
-  loader: ({ params }) =>
-    queryClient.ensureQueryData(
-      canVoteQuery({ pathParams: { pollId: params.pollId } }),
-    ),
-})
+  loader: ({ params }) => queryClient.ensureQueryData(canVoteQuery({ pathParams: { pollId: params.pollId } })),
+});
 
 function VoteButton({ poll }: { poll: Schemas.Poll }) {
   const { data: canVote } = useSuspenseCanVote({
     pathParams: { pollId: poll.id },
-  })
+  });
 
   const InnerButton = () => (
     <Button
@@ -37,10 +30,10 @@ function VoteButton({ poll }: { poll: Schemas.Poll }) {
     >
       Vote
     </Button>
-  )
+  );
 
   if (canVote.can_vote) {
-    return <InnerButton />
+    return <InnerButton />;
   }
 
   return (
@@ -49,19 +42,20 @@ function VoteButton({ poll }: { poll: Schemas.Poll }) {
         <InnerButton />
       </span>
     </Tooltip>
-  )
+  );
 }
 
 function RouteComponent() {
-  const { pollId } = Route.useParams()
-  const { data: poll } = useSuspenseGetPoll({ pathParams: { pollId } })
-  const isOwner = useStore((state) => state.user.is_owner)
+  const { pollId } = Route.useParams();
+  const { data: poll } = useSuspenseGetPoll({ pathParams: { pollId } });
+  const userId = useStore((state) => state.user.id);
+  const isOwner = useStore((state) => state.user.is_owner);
 
   return (
     <>
       <CardFooter>
         <div className="flex w-full justify-end gap-2">
-          {isOwner && (
+          {(poll.owner_id === userId || isOwner) && (
             <>
               <Button
                 to={'/polls/$pollId/results'}
@@ -87,5 +81,5 @@ function RouteComponent() {
         </div>
       </CardFooter>
     </>
-  )
+  );
 }

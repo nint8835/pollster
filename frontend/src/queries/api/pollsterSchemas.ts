@@ -4,68 +4,68 @@
  * @version 0.1.0
  */
 export enum PollStatus {
-    pending = 'pending',
-    open = 'open',
-    closed = 'closed',
+  pending = 'pending',
+  open = 'open',
+  closed = 'closed',
 }
 
 export type CanVote = {
-    can_vote: boolean;
-    reason: string;
+  can_vote: boolean;
+  reason: string;
 };
 
 export type CreatePoll = {
-    name: string;
+  name: string;
 };
 
 export type CreatePollOption = {
-    name: string;
+  name: string;
 };
 
 export type DiscordUser = {
-    id: string;
-    username: string;
-    is_owner: boolean;
+  id: string;
+  username: string;
+  is_owner: boolean;
 };
 
 export type EditPoll = {
-    name?: string | null;
-    status?: PollStatus | null;
+  name?: string | null;
+  status?: PollStatus | null;
 };
 
 export type EditPollOption = {
-    name: string;
+  name: string;
 };
 
 /**
  * A generic error response.
  */
 export type ErrorResponse = {
-    /**
-     * A description of the error.
-     */
-    detail: string;
+  /**
+   * A description of the error.
+   */
+  detail: string;
 };
 
 export type HTTPValidationError = {
-    detail?: ValidationError[];
+  detail?: ValidationError[];
 };
 
 export type Poll = {
-    id: string;
-    name: string;
-    status: PollStatus;
-    owner_id: string;
-    options: PollOption[];
+  id: string;
+  name: string;
+  status: PollStatus;
+  owner_id: string;
+  options: PollOption[];
 };
 
 export type PollOption = {
-    id: string;
-    name: string;
+  id: string;
+  name: string;
 };
 
 export type ValidationError = {
-    loc: (string | number)[];
-    msg: string;
-    type: string;
+  loc: (string | number)[];
+  msg: string;
+  type: string;
 };

@@ -1,24 +1,18 @@
-import { Card, CardHeader } from '@heroui/react'
-import { Link, Outlet, createFileRoute } from '@tanstack/react-router'
+import { Card, CardHeader } from '@heroui/react';
+import { Link, Outlet, createFileRoute } from '@tanstack/react-router';
 
-import { StatusCell } from '@/components/status_cell'
-import {
-  getPollQuery,
-  useSuspenseGetPoll,
-} from '@/queries/api/pollsterComponents'
-import { queryClient } from '@/queries/client'
+import { StatusCell } from '@/components/status_cell';
+import { getPollQuery, useSuspenseGetPoll } from '@/queries/api/pollsterComponents';
+import { queryClient } from '@/queries/client';
 
 export const Route = createFileRoute('/(app)/polls/$pollId')({
   component: RouteComponent,
-  loader: ({ params }) =>
-    queryClient.ensureQueryData(
-      getPollQuery({ pathParams: { pollId: params.pollId } }),
-    ),
-})
+  loader: ({ params }) => queryClient.ensureQueryData(getPollQuery({ pathParams: { pollId: params.pollId } })),
+});
 
 function RouteComponent() {
-  const { pollId } = Route.useParams()
-  const { data: poll } = useSuspenseGetPoll({ pathParams: { pollId } })
+  const { pollId } = Route.useParams();
+  const { data: poll } = useSuspenseGetPoll({ pathParams: { pollId } });
 
   return (
     <Card>
@@ -30,5 +24,5 @@ function RouteComponent() {
       </CardHeader>
       <Outlet />
     </Card>
-  )
+  );
 }

@@ -10,54 +10,54 @@ import { useStore } from '@/lib/state';
 import { fetchGetCurrentUser } from '@/queries/api/pollsterComponents';
 
 export const Route = createRootRoute({
-    component: Root,
-    beforeLoad: async ({ location }) => {
-        if (useStore.getState().user.id) {
-            return;
-        }
+  component: Root,
+  beforeLoad: async ({ location }) => {
+    if (useStore.getState().user.id) {
+      return;
+    }
 
-        const currentUser = await fetchGetCurrentUser({});
-        if (!currentUser) {
-            throw redirect({
-                to: '/auth/login',
-                search: { next: location.href },
-                reloadDocument: true,
-            });
-        }
-        useStore.getState().setUser(currentUser);
-    },
+    const currentUser = await fetchGetCurrentUser({});
+    if (!currentUser) {
+      throw redirect({
+        to: '/auth/login',
+        search: { next: location.href },
+        reloadDocument: true,
+      });
+    }
+    useStore.getState().setUser(currentUser);
+  },
 });
 
 declare module '@react-types/shared' {
-    interface RouterConfig {
-        href: ToOptions['to'];
-        routerOptions: Omit<NavigateOptions, keyof ToOptions>;
-    }
+  interface RouterConfig {
+    href: ToOptions['to'];
+    routerOptions: Omit<NavigateOptions, keyof ToOptions>;
+  }
 }
 
 function Root() {
-    const router = useRouter();
+  const router = useRouter();
 
-    return (
-        <HeroUIProvider
-            navigate={(to, options) => router.navigate({ to, ...options })}
-            useHref={(to) => router.buildLocation({ to }).href}
-        >
-            <div className="relative flex h-screen flex-col overflow-auto">
-                <Navbar>
-                    <NavbarBrand>
-                        <Link href="/" color="foreground">
-                            <h1 className="text-2xl font-bold">Pollster</h1>
-                        </Link>
-                    </NavbarBrand>
-                </Navbar>
-                <main className="container mx-auto max-w-7xl flex-grow px-6">
-                    <Outlet />
-                </main>
-            </div>
+  return (
+    <HeroUIProvider
+      navigate={(to, options) => router.navigate({ to, ...options })}
+      useHref={(to) => router.buildLocation({ to }).href}
+    >
+      <div className="relative flex h-screen flex-col overflow-auto">
+        <Navbar>
+          <NavbarBrand>
+            <Link href="/" color="foreground">
+              <h1 className="text-2xl font-bold">Pollster</h1>
+            </Link>
+          </NavbarBrand>
+        </Navbar>
+        <main className="container mx-auto max-w-7xl flex-grow px-6">
+          <Outlet />
+        </main>
+      </div>
 
-            <ReactQueryDevtools initialIsOpen={false} />
-            <TanStackRouterDevtools />
-        </HeroUIProvider>
-    );
+      <ReactQueryDevtools initialIsOpen={false} />
+      <TanStackRouterDevtools />
+    </HeroUIProvider>
+  );
 }
