@@ -40,14 +40,17 @@ polls_router = APIRouter(tags=["Polls"], dependencies=[Depends(require_discord_u
         }
     },
 )
-async def list_polls(db: AsyncSession = Depends(get_db)) -> Sequence[Poll]:
-    """List all polls."""
-    return (
-        (await db.execute(select(Poll).options(joinedload(Poll.options))))
-        .unique()
-        .scalars()
-        .all()
-    )
+async def list_polls(
+    db: AsyncSession = Depends(get_db),
+    user: DiscordUser = Depends(require_discord_user),
+) -> Sequence[Poll]:
+    """List all polls owned by the current user."""
+    polls_query = select(Poll).options(joinedload(Poll.options))
+
+    if not user.is_owner:
+        polls_query = polls_query.filter_by(owner_id=user.id)
+
+    return (await db.execute(polls_query)).unique().scalars().all()
 
 
 @polls_router.get(
@@ -113,14 +116,6 @@ async def create_poll(
     user: DiscordUser = Depends(require_discord_user),
 ):
     """Create a new poll."""
-    if user.id != config.owner_id:
-        return JSONResponse(
-            status_code=status.HTTP_403_FORBIDDEN,
-            content=ErrorResponse(
-                detail="You do not have permission to create new polls."
-            ).model_dump(),
-        )
-
     async with db.begin():
         new_poll = Poll(
             name=poll.name, status=PollStatus.Pending, owner_id=user.id, options=[]

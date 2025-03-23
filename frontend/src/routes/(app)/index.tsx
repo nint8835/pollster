@@ -66,7 +66,6 @@ function CreatePollModal({ isOpen, onOpenChange }: { isOpen: boolean; onOpenChan
 
 function RouteComponent() {
   const { data: polls } = useSuspenseListPolls({});
-  const isOwner = useStore((state) => state.user.is_owner);
   const {
     isOpen: isCreateModalOpen,
     onOpen: onCreateModalOpen,
@@ -96,13 +95,11 @@ function RouteComponent() {
             )}
           </TableBody>
         </Table>
-        {isOwner && (
-          <div className="flex justify-center">
-            <Button startContent={<Plus />} onPress={onCreateModalOpen}>
-              Create Poll
-            </Button>
-          </div>
-        )}
+        <div className="flex justify-center">
+          <Button startContent={<Plus />} onPress={onCreateModalOpen}>
+            Create Poll
+          </Button>
+        </div>
       </div>
       <CreatePollModal isOpen={isCreateModalOpen} onOpenChange={onCreateModalOpenChange} />
     </>

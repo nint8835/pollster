@@ -88,7 +88,7 @@ export type ListPollsResponse = Schemas.Poll[];
 export type ListPollsVariables = PollsterContext['fetcherOptions'];
 
 /**
- * List all polls.
+ * List all polls owned by the current user.
  */
 export const fetchListPolls = (variables: ListPollsVariables, signal?: AbortSignal) =>
   pollsterFetch<ListPollsResponse, ListPollsError, undefined, {}, {}, {}>({
@@ -99,7 +99,7 @@ export const fetchListPolls = (variables: ListPollsVariables, signal?: AbortSign
   });
 
 /**
- * List all polls.
+ * List all polls owned by the current user.
  */
 export const listPollsQuery = (
   variables: ListPollsVariables,
@@ -116,7 +116,7 @@ export const listPollsQuery = (
 });
 
 /**
- * List all polls.
+ * List all polls owned by the current user.
  */
 export const useSuspenseListPolls = <TData = ListPollsResponse>(
   variables: ListPollsVariables,
@@ -134,7 +134,7 @@ export const useSuspenseListPolls = <TData = ListPollsResponse>(
 };
 
 /**
- * List all polls.
+ * List all polls owned by the current user.
  */
 export const useListPolls = <TData = ListPollsResponse>(
   variables: ListPollsVariables,
