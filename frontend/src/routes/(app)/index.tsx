@@ -20,7 +20,6 @@ import { useState } from 'react';
 
 import { Link } from '@/components/link';
 import { StatusCell } from '@/components/status_cell';
-import { useStore } from '@/lib/state';
 import { listPollsQuery, useCreatePoll, useSuspenseListPolls } from '@/queries/api/pollsterComponents';
 import { queryClient } from '@/queries/client';
 
