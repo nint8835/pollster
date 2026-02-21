@@ -13,7 +13,7 @@ class Config(BaseSettings):
     client_id: str
     client_secret: str
     session_secret: str = "change_me"
-    guild_id: str
+    guild_ids: list[str]
     owner_id: str
 
     db_path: str = "pollster.sqlite"
