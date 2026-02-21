@@ -1,9 +1,10 @@
-import { HeroUIProvider, Link, Navbar, NavbarBrand } from '@heroui/react';
+import { HeroUIProvider, Navbar, NavbarBrand } from '@heroui/react';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { Outlet, createRootRoute, redirect } from '@tanstack/react-router';
 import type { NavigateOptions, ToOptions } from '@tanstack/react-router';
 import { useRouter } from '@tanstack/react-router';
 
+import { Link } from '@/components/link';
 import { TanStackRouterDevtools } from '@/components/util/router-dev-tools';
 import '@/index.css';
 import { useStore } from '@/lib/state';
@@ -46,7 +47,7 @@ function Root() {
       <div className="relative flex h-screen flex-col overflow-auto">
         <Navbar>
           <NavbarBrand>
-            <Link href="/" color="foreground">
+            <Link to="/" color="foreground">
               <h1 className="text-2xl font-bold">Pollster</h1>
             </Link>
           </NavbarBrand>
