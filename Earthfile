@@ -26,29 +26,31 @@ python-deps:
     SAVE ARTIFACT venv
 
 node-deps:
-    FROM cgr.dev/chainguard/node:latest
+    FROM node:lts-slim
     WORKDIR /pollster
 
-    COPY --chown=node:node package.json package-lock.json ./
+    COPY package.json package-lock.json ./
     RUN npm install
 
     SAVE ARTIFACT node_modules
 
 
 frontend:
-    FROM cgr.dev/chainguard/node:latest
+    FROM node:lts-slim
     WORKDIR /pollster
 
     COPY +node-deps/node_modules ./node_modules
 
-    COPY --chown=node:node package.json package-lock.json vite.config.ts tsconfig.json tsconfig.node.json tsconfig.app.json ./
-    COPY --chown=node:node frontend frontend
+    COPY package.json package-lock.json vite.config.ts tsconfig.json tsconfig.node.json tsconfig.app.json ./
+    COPY frontend frontend
     RUN npm run build
 
     SAVE ARTIFACT --keep-ts frontend/dist
 
 
 app:
+    ARG TAG
+
     FROM python:3.13-slim-bookworm
     WORKDIR /pollster
 
@@ -62,4 +64,4 @@ app:
     ENTRYPOINT ["python", "-m", "pollster"]
     CMD ["start"]
 
-    SAVE IMAGE --push ghcr.io/nint8835/pollster:latest
+    SAVE IMAGE --push ghcr.io/nint8835/pollster:latest ghcr.io/nint8835/pollster:$TAG
