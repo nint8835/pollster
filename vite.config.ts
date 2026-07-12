@@ -10,6 +10,9 @@ export default defineConfig({
   root: 'frontend',
   plugins: [
     heyApiPlugin({
+      vite: {
+        apply: 'serve',
+      },
       config: {
         input: 'http://localhost:8000/openapi.json',
         output: 'frontend/src/queries/api',
