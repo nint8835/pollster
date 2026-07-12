@@ -1,7 +1,7 @@
 import json
 from typing import Sequence
 
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, Response, status
 from fastapi.responses import JSONResponse
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -570,9 +570,7 @@ async def edit_poll_option(
 
 @polls_router.delete(
     "/{poll_id}/options/{option_id}",
-    # This should be a 204 No Content, but openapi-codegen explodes if it doesn't get back a response body
-    # https://github.com/fabien0102/openapi-codegen/issues/257
-    status_code=status.HTTP_202_ACCEPTED,
+    status_code=status.HTTP_204_NO_CONTENT,
     responses={
         status.HTTP_401_UNAUTHORIZED: {
             "description": "Unauthorized",
@@ -628,7 +626,7 @@ async def delete_poll_option(
         await db.delete(option_model)
         await db.commit()
 
-    return JSONResponse(status_code=status.HTTP_202_ACCEPTED, content={})
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
 __all__ = ["polls_router"]

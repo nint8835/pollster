@@ -1,18 +1,19 @@
 import { Card, CardHeader } from '@heroui/react';
+import { useSuspenseQuery } from '@tanstack/react-query';
 import { Link, Outlet, createFileRoute } from '@tanstack/react-router';
 
 import { StatusCell } from '@/components/status_cell';
-import { getPollQuery, useSuspenseGetPoll } from '@/queries/api/pollsterComponents';
+import { getPollOptions } from '@/queries/api';
 import { queryClient } from '@/queries/client';
 
 export const Route = createFileRoute('/(app)/polls/$pollId')({
   component: RouteComponent,
-  loader: ({ params }) => queryClient.ensureQueryData(getPollQuery({ pathParams: { pollId: params.pollId } })),
+  loader: ({ params }) => queryClient.ensureQueryData(getPollOptions({ path: { poll_id: params.pollId } })),
 });
 
 function RouteComponent() {
   const { pollId } = Route.useParams();
-  const { data: poll } = useSuspenseGetPoll({ pathParams: { pollId } });
+  const { data: poll } = useSuspenseQuery(getPollOptions({ path: { poll_id: pollId } }));
 
   return (
     <Card>

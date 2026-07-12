@@ -1,18 +1,18 @@
 import { Chip, ChipProps } from '@heroui/react';
 
-import { PollStatus } from '@/queries/api/pollsterSchemas';
+import type { PollStatus } from '@/queries/api';
 
 export const StatusCell = ({ status }: { status: PollStatus }) => {
   const props: Record<PollStatus, Partial<ChipProps>> = {
-    [PollStatus.pending]: {
+    pending: {
       color: 'warning',
       children: 'Pending',
     },
-    [PollStatus.open]: {
+    open: {
       color: 'success',
       children: 'Open',
     },
-    [PollStatus.closed]: {
+    closed: {
       color: 'danger',
       children: 'Closed',
     },

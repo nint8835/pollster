@@ -14,24 +14,25 @@ import {
   TableRow,
   useDisclosure,
 } from '@heroui/react';
+import { useSuspenseQuery } from '@tanstack/react-query';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { Plus } from 'lucide-react';
 import { useState } from 'react';
 
 import { Link } from '@/components/link';
 import { StatusCell } from '@/components/status_cell';
-import { listPollsQuery, useCreatePoll, useSuspenseListPolls } from '@/queries/api/pollsterComponents';
+import { listPollsOptions, useCreatePollMutation } from '@/queries/api';
 import { queryClient } from '@/queries/client';
 
 export const Route = createFileRoute('/(app)/')({
   component: RouteComponent,
-  loader: () => queryClient.ensureQueryData(listPollsQuery({})),
+  loader: () => queryClient.ensureQueryData(listPollsOptions()),
 });
 
 const columns = [{ name: 'ID' }, { name: 'Name' }, { name: 'Status' }];
 
 function CreatePollModal({ isOpen, onOpenChange }: { isOpen: boolean; onOpenChange: (isOpen: boolean) => void }) {
-  const { mutateAsync: createPoll } = useCreatePoll();
+  const { mutateAsync: createPoll } = useCreatePollMutation();
   const [name, setName] = useState('');
   const navigate = useNavigate();
 
@@ -47,7 +48,7 @@ function CreatePollModal({ isOpen, onOpenChange }: { isOpen: boolean; onOpenChan
             color="primary"
             onPress={async () => {
               const newPoll = await createPoll({ body: { name } });
-              queryClient.invalidateQueries(listPollsQuery({}));
+              queryClient.invalidateQueries(listPollsOptions());
               onOpenChange(false);
               navigate({
                 to: '/polls/$pollId/manage',
@@ -64,7 +65,7 @@ function CreatePollModal({ isOpen, onOpenChange }: { isOpen: boolean; onOpenChan
 }
 
 function RouteComponent() {
-  const { data: polls } = useSuspenseListPolls({});
+  const { data: polls } = useSuspenseQuery(listPollsOptions());
   const {
     isOpen: isCreateModalOpen,
     onOpen: onCreateModalOpen,

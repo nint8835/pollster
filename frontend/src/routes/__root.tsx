@@ -8,7 +8,7 @@ import { Link } from '@/components/link';
 import { TanStackRouterDevtools } from '@/components/util/router-dev-tools';
 import '@/index.css';
 import { useStore } from '@/lib/state';
-import { fetchGetCurrentUser } from '@/queries/api/pollsterComponents';
+import { getCurrentUser } from '@/queries/api';
 
 export const Route = createRootRoute({
   component: Root,
@@ -17,7 +17,7 @@ export const Route = createRootRoute({
       return;
     }
 
-    const currentUser = await fetchGetCurrentUser({});
+    const { data: currentUser } = await getCurrentUser({ throwOnError: true });
     if (!currentUser) {
       throw redirect({
         to: '/auth/login',

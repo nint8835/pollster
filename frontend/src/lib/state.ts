@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 
-import type { DiscordUser } from '@/queries/api/pollsterSchemas';
+import type { DiscordUser } from '@/queries/api';
 
 interface State {
   user: DiscordUser;

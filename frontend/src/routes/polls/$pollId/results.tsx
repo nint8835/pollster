@@ -1,28 +1,27 @@
 import { ResponsiveBar } from '@nivo/bar';
 import { colorSchemes } from '@nivo/colors';
+import { useSuspenseQuery } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
 
-import {
-  getPollQuery,
-  listVotesQuery,
-  useSuspenseGetPoll,
-  useSuspenseListVotes,
-} from '@/queries/api/pollsterComponents';
+import { getPollOptions, listVotesOptions } from '@/queries/api';
 import { queryClient } from '@/queries/client';
 
 export const Route = createFileRoute('/polls/$pollId/results')({
   component: RouteComponent,
   loader: ({ params }) =>
     Promise.all([
-      queryClient.ensureQueryData(listVotesQuery({ pathParams: { pollId: params.pollId } })),
-      queryClient.ensureQueryData(getPollQuery({ pathParams: { pollId: params.pollId } })),
+      queryClient.ensureQueryData(listVotesOptions({ path: { poll_id: params.pollId } })),
+      queryClient.ensureQueryData(getPollOptions({ path: { poll_id: params.pollId } })),
     ]),
 });
 
 function RouteComponent() {
   const { pollId } = Route.useParams();
-  const { data: poll } = useSuspenseGetPoll({ pathParams: { pollId } });
-  const { data: votes } = useSuspenseListVotes({ pathParams: { pollId } }, { refetchInterval: 5000 });
+  const { data: poll } = useSuspenseQuery(getPollOptions({ path: { poll_id: pollId } }));
+  const { data: votes } = useSuspenseQuery({
+    ...listVotesOptions({ path: { poll_id: pollId } }),
+    refetchInterval: 5000,
+  });
 
   const scores = poll.options
     .map((option) => ({ id: option.id, name: option.name, points: votes[option.id] }))

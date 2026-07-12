@@ -1,18 +1,18 @@
 import { Button, ButtonProps, CardBody, CardFooter, Checkbox, Input } from '@heroui/react';
+import { useSuspenseQuery } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
 import { Plus, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 
 import { pluralize } from '@/lib/utils';
 import {
-  getPollQuery,
-  useCreatePollOption,
-  useDeletePollOption,
-  useEditPoll,
-  useEditPollOption,
-  useSuspenseGetPoll,
-} from '@/queries/api/pollsterComponents';
-import { PollStatus } from '@/queries/api/pollsterSchemas';
+  getPollOptions,
+  useCreatePollOptionMutation,
+  useDeletePollOptionMutation,
+  useEditPollMutation,
+  useEditPollOptionMutation,
+} from '@/queries/api';
+import type { PollStatus } from '@/queries/api';
 import { queryClient } from '@/queries/client';
 
 export const Route = createFileRoute('/(app)/polls/$pollId/manage')({
@@ -29,23 +29,24 @@ function requiredComparisons(itemCount: number): number {
 
 function RouteComponent() {
   const { pollId } = Route.useParams();
-  const { data: poll } = useSuspenseGetPoll({ pathParams: { pollId } });
+  const pollOptions = getPollOptions({ path: { poll_id: pollId } });
+  const { data: poll } = useSuspenseQuery(pollOptions);
   const [newOption, setNewOption] = useState('');
-  const { mutateAsync: createPollOption } = useCreatePollOption();
-  const { mutateAsync: editPollOption } = useEditPollOption();
-  const { mutateAsync: deletePollOption } = useDeletePollOption();
+  const { mutateAsync: createPollOption } = useCreatePollOptionMutation();
+  const { mutateAsync: editPollOption } = useEditPollOptionMutation();
+  const { mutateAsync: deletePollOption } = useDeletePollOptionMutation();
   const [editingOption, setEditingOption] = useState<{ id: string; name: string } | undefined>(undefined);
-  const { mutateAsync: editPoll } = useEditPoll();
+  const { mutateAsync: editPoll } = useEditPollMutation();
 
   const requiredComparisonCount = requiredComparisons(poll.options.length);
 
   const handleCreatePollOption = async () => {
     await createPollOption({
       body: { name: newOption },
-      pathParams: { pollId },
+      path: { poll_id: pollId },
     });
     setNewOption('');
-    await queryClient.invalidateQueries(getPollQuery({ pathParams: { pollId } }));
+    await queryClient.invalidateQueries(pollOptions);
   };
   const handleEditPollOption = async () => {
     if (!editingOption) {
@@ -53,32 +54,34 @@ function RouteComponent() {
     }
     await editPollOption({
       body: { name: editingOption.name },
-      pathParams: { pollId, optionId: editingOption.id },
+      path: { poll_id: pollId, option_id: editingOption.id },
     });
-    await queryClient.invalidateQueries(getPollQuery({ pathParams: { pollId } }));
+    await queryClient.invalidateQueries(pollOptions);
     setEditingOption(undefined);
   };
   const handleDeletePollOption = async (optionId: string) => {
-    await deletePollOption({ pathParams: { pollId, optionId: optionId } });
-    await queryClient.invalidateQueries(getPollQuery({ pathParams: { pollId } }));
+    await deletePollOption({ path: { poll_id: pollId, option_id: optionId } });
+    await queryClient.invalidateQueries(pollOptions);
   };
   const handleToggleAllowUsersToViewResults = async () => {
     await editPoll({
       body: { allow_users_to_view_results: !poll.allow_users_to_view_results },
-      pathParams: { pollId },
+      path: { poll_id: pollId },
     });
-    await queryClient.invalidateQueries(getPollQuery({ pathParams: { pollId } }));
+    await queryClient.invalidateQueries(pollOptions);
   };
 
-  const nextPollStatus: PollStatus | null = {
-    [PollStatus.pending]: PollStatus.open,
-    [PollStatus.open]: PollStatus.closed,
-    [PollStatus.closed]: null,
-  }[poll.status];
+  const nextPollStatus = (
+    {
+      pending: 'open',
+      open: 'closed',
+      closed: null,
+    } satisfies Record<PollStatus, PollStatus | null>
+  )[poll.status];
   const nextPollPropsRecord: Record<PollStatus, Partial<ButtonProps>> = {
-    [PollStatus.pending]: { color: 'primary', children: 'Open Poll' },
-    [PollStatus.open]: { color: 'danger', children: 'Close Poll' },
-    [PollStatus.closed]: {},
+    pending: { color: 'primary', children: 'Open Poll' },
+    open: { color: 'danger', children: 'Close Poll' },
+    closed: {},
   };
 
   const handleNextStatus = async () => {
@@ -86,8 +89,8 @@ function RouteComponent() {
       return;
     }
 
-    await editPoll({ body: { status: nextPollStatus }, pathParams: { pollId } });
-    await queryClient.invalidateQueries(getPollQuery({ pathParams: { pollId } }));
+    await editPoll({ body: { status: nextPollStatus }, path: { poll_id: pollId } });
+    await queryClient.invalidateQueries(pollOptions);
   };
 
   return (
@@ -130,7 +133,7 @@ function RouteComponent() {
       </CardBody>
       <CardFooter>
         <div className="flex w-full items-center justify-between gap-2">
-          <div className="italic text-zinc-400">
+          <div className="text-zinc-400 italic">
             Voters will be required to complete approximately {Math.ceil(requiredComparisonCount).toLocaleString()}{' '}
             {pluralize(requiredComparisonCount, 'comparison', 'comparisons')}.
           </div>

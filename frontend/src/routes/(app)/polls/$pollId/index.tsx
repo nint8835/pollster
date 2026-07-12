@@ -1,24 +1,23 @@
 import { Button, CardFooter, Tooltip } from '@heroui/react';
+import { useSuspenseQuery } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
 import { ChartColumnDecreasing, Edit, Vote } from 'lucide-react';
 
 import { Link } from '@/components/link';
 import { useStore } from '@/lib/state';
-import { canVoteQuery, useSuspenseCanVote, useSuspenseGetPoll } from '@/queries/api/pollsterComponents';
-import * as Schemas from '@/queries/api/pollsterSchemas';
+import { canVoteOptions, getPollOptions } from '@/queries/api';
+import type { Poll } from '@/queries/api';
 import { queryClient } from '@/queries/client';
 
 export const Route = createFileRoute('/(app)/polls/$pollId/')({
   component: RouteComponent,
-  loader: ({ params }) => queryClient.ensureQueryData(canVoteQuery({ pathParams: { pollId: params.pollId } })),
+  loader: ({ params }) => queryClient.ensureQueryData(canVoteOptions({ path: { poll_id: params.pollId } })),
 });
 
-function VoteButton({ poll }: { poll: Schemas.Poll }) {
-  const { data: canVote } = useSuspenseCanVote({
-    pathParams: { pollId: poll.id },
-  });
+function VoteButton({ poll }: { poll: Poll }) {
+  const { data: canVote } = useSuspenseQuery(canVoteOptions({ path: { poll_id: poll.id } }));
 
-  const InnerButton = () => (
+  const innerButton = (
     <Button
       to={'/polls/$pollId/vote'}
       //@ts-ignore - I can't figure out how to get a `Button` with an `as` of a `Link` to work properly
@@ -33,21 +32,19 @@ function VoteButton({ poll }: { poll: Schemas.Poll }) {
   );
 
   if (canVote.can_vote) {
-    return <InnerButton />;
+    return innerButton;
   }
 
   return (
     <Tooltip content={canVote.reason}>
-      <span>
-        <InnerButton />
-      </span>
+      <span>{innerButton}</span>
     </Tooltip>
   );
 }
 
 function RouteComponent() {
   const { pollId } = Route.useParams();
-  const { data: poll } = useSuspenseGetPoll({ pathParams: { pollId } });
+  const { data: poll } = useSuspenseQuery(getPollOptions({ path: { poll_id: pollId } }));
   const userId = useStore((state) => state.user.id);
   const isOwner = useStore((state) => state.user.is_owner);
   const canManage = poll.owner_id === userId || isOwner;

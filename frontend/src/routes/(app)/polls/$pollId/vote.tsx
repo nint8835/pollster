@@ -1,19 +1,20 @@
 import { Button, CardBody, CardFooter, cn } from '@heroui/react';
+import { useSuspenseQuery } from '@tanstack/react-query';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useState } from 'react';
 
-import { canVoteQuery, useCreateVote, useSuspenseCanVote, useSuspenseGetPoll } from '@/queries/api/pollsterComponents';
-import { PollOption } from '@/queries/api/pollsterSchemas';
+import { canVoteOptions, getPollOptions, useCreateVoteMutation } from '@/queries/api';
+import type { PollOption } from '@/queries/api';
 import { queryClient } from '@/queries/client';
 
 export const Route = createFileRoute('/(app)/polls/$pollId/vote')({
   component: RouteComponent,
-  loader: ({ params }) => queryClient.ensureQueryData(canVoteQuery({ pathParams: { pollId: params.pollId } })),
+  loader: ({ params }) => queryClient.ensureQueryData(canVoteOptions({ path: { poll_id: params.pollId } })),
 });
 
 function VoteInterface({ pollId }: { pollId: string }) {
-  const { data: poll } = useSuspenseGetPoll({ pathParams: { pollId } });
-  const { mutateAsync: submitVote } = useCreateVote();
+  const { data: poll } = useSuspenseQuery(getPollOptions({ path: { poll_id: pollId } }));
+  const { mutateAsync: submitVote } = useCreateVoteMutation();
 
   const navigate = useNavigate();
 
@@ -61,7 +62,7 @@ function VoteInterface({ pollId }: { pollId: string }) {
               .map(([item, index]) => (
                 <li
                   className={cn(
-                    item === null && 'italic text-zinc-400',
+                    item === null && 'text-zinc-400 italic',
                     index < low || index >= high ? 'opacity-50' : 'opacity-100',
                   )}
                 >
@@ -74,7 +75,7 @@ function VoteInterface({ pollId }: { pollId: string }) {
       <CardFooter>
         {pendingItems.length > 0 ? (
           <div className="flex w-full flex-col gap-2">
-            <div className="text-center italic text-zinc-400">
+            <div className="text-center text-zinc-400 italic">
               Select the option of the two that should be ranked higher.
             </div>
             <div className="grid w-full grid-cols-1 gap-2 md:grid-cols-2">
@@ -88,7 +89,7 @@ function VoteInterface({ pollId }: { pollId: string }) {
           </div>
         ) : (
           <div className="flex w-full flex-col gap-2">
-            <div className="text-center italic text-zinc-400">
+            <div className="text-center text-zinc-400 italic">
               Ranking complete. Review your vote above and submit when ready.
             </div>
             <div className="grid w-full grid-cols-1 gap-2 md:grid-cols-2">
@@ -99,7 +100,7 @@ function VoteInterface({ pollId }: { pollId: string }) {
                 color="primary"
                 onPress={async () => {
                   await submitVote({
-                    pathParams: { pollId },
+                    path: { poll_id: pollId },
                     body: rankedItems.map((i) => i.id),
                   });
                   navigate({ to: '/polls/$pollId', params: { pollId } });
@@ -117,7 +118,7 @@ function VoteInterface({ pollId }: { pollId: string }) {
 
 function RouteComponent() {
   const { pollId } = Route.useParams();
-  const { data: canVote } = useSuspenseCanVote({ pathParams: { pollId } });
+  const { data: canVote } = useSuspenseQuery(canVoteOptions({ path: { poll_id: pollId } }));
 
   if (!canVote.can_vote) {
     return (
