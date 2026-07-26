@@ -22,7 +22,7 @@ class SPAStaticFiles(StaticFiles):
             if exc.status_code == 404:
                 return await super().get_response("index.html", scope)
             else:
-                raise exc
+                raise
 
 
 app = FastAPI(

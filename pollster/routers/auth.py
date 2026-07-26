@@ -1,4 +1,4 @@
-from typing import cast
+from typing import Annotated, cast
 
 from fastapi import APIRouter, Depends, HTTPException, Request, Response
 from fastapi.responses import RedirectResponse
@@ -46,7 +46,7 @@ async def logout(request: Request) -> Response:
 
 @auth_router.get("/me")
 async def get_current_user(
-    user: DiscordUser | None = Depends(get_discord_user),
+    user: Annotated[DiscordUser | None, Depends(get_discord_user)],
 ) -> DiscordUser | None:
     """Retrieve the details of the current user."""
     return user

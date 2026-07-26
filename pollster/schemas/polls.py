@@ -45,11 +45,11 @@ class CanVote(BaseModel):
 
 
 __all__ = [
+    "CanVote",
+    "CreatePoll",
+    "CreatePollOption",
+    "EditPoll",
+    "EditPollOption",
     "Poll",
     "PollOption",
-    "CreatePoll",
-    "EditPoll",
-    "CreatePollOption",
-    "EditPollOption",
-    "CanVote",
 ]

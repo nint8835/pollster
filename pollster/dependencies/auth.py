@@ -1,5 +1,7 @@
+from typing import Annotated
+
 from authlib.integrations.starlette_client import OAuth
-from fastapi import HTTPException, Request
+from fastapi import Depends, HTTPException, Request
 
 from pollster.config import config
 from pollster.schemas.discord_user import DiscordUser, SessionUser
@@ -40,3 +42,6 @@ def require_discord_user(request: Request) -> DiscordUser:
         )
 
     return user
+
+
+AuthenticatedUser = Annotated[DiscordUser, Depends(require_discord_user)]

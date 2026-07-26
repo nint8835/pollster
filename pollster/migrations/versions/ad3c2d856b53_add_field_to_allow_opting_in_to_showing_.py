@@ -8,7 +8,7 @@ Create Date: 2025-03-22 14:38:22.757038
 
 import enum
 import typing
-from typing import Sequence, Union
+from collections.abc import Sequence
 
 import sqlalchemy as sa
 from alembic import op
@@ -17,13 +17,13 @@ from sqlalchemy.orm import DeclarativeBase, Mapped, Session, mapped_column
 
 # revision identifiers, used by Alembic.
 revision: str = "ad3c2d856b53"
-down_revision: Union[str, None] = "56f717a43418"
-branch_labels: Union[str, Sequence[str], None] = None
-depends_on: Union[str, Sequence[str], None] = None
+down_revision: str | None = "56f717a43418"
+branch_labels: str | Sequence[str] | None = None
+depends_on: str | Sequence[str] | None = None
 
 
 class Base(AsyncAttrs, DeclarativeBase):
-    type_annotation_map = {
+    type_annotation_map: typing.ClassVar = {
         enum.Enum: sa.Enum(enum.Enum, native_enum=False),
         typing.Literal: sa.Enum(enum.Enum, native_enum=False),
     }

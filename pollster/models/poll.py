@@ -47,4 +47,4 @@ class Vote(Base):
     poll: Mapped[Poll] = relationship(lazy="raise")
 
 
-__all__ = ["Poll", "PollStatus", "PollOption", "Vote"]
+__all__ = ["Poll", "PollOption", "PollStatus", "Vote"]

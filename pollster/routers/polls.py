@@ -1,18 +1,16 @@
 import json
-from typing import Sequence
+from collections.abc import Sequence
 
 from fastapi import APIRouter, Depends, Response, status
 from fastapi.responses import JSONResponse
 from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload
 
 from pollster.config import config
-from pollster.dependencies.auth import require_discord_user
-from pollster.dependencies.database import get_db
+from pollster.dependencies.auth import AuthenticatedUser, require_discord_user
+from pollster.dependencies.database import DatabaseSession
 from pollster.models.poll import Poll, PollOption, PollStatus, Vote
 from pollster.schemas import ErrorResponse
-from pollster.schemas.discord_user import DiscordUser
 from pollster.schemas.polls import (
     CanVote,
     CreatePoll,
@@ -41,8 +39,8 @@ polls_router = APIRouter(tags=["Polls"], dependencies=[Depends(require_discord_u
     },
 )
 async def list_polls(
-    db: AsyncSession = Depends(get_db),
-    user: DiscordUser = Depends(require_discord_user),
+    db: DatabaseSession,
+    user: AuthenticatedUser,
 ) -> Sequence[Poll]:
     """List all polls owned by the current user."""
     polls_query = select(Poll).options(joinedload(Poll.options))
@@ -67,7 +65,7 @@ async def list_polls(
         },
     },
 )
-async def get_poll(poll_id: str, db: AsyncSession = Depends(get_db)):
+async def get_poll(poll_id: str, db: DatabaseSession):
     """Retrieve a poll by ID."""
     try:
         int_poll_id = int(poll_id)
@@ -112,8 +110,8 @@ async def get_poll(poll_id: str, db: AsyncSession = Depends(get_db)):
 )
 async def create_poll(
     poll: CreatePoll,
-    db: AsyncSession = Depends(get_db),
-    user: DiscordUser = Depends(require_discord_user),
+    db: DatabaseSession,
+    user: AuthenticatedUser,
 ):
     """Create a new poll."""
     async with db.begin():
@@ -144,8 +142,8 @@ async def create_poll(
 async def edit_poll(
     poll_id: str,
     poll: EditPoll,
-    db: AsyncSession = Depends(get_db),
-    user: DiscordUser = Depends(require_discord_user),
+    db: DatabaseSession,
+    user: AuthenticatedUser,
 ):
     """Edit a poll."""
     try:
@@ -212,8 +210,8 @@ async def edit_poll(
 )
 async def can_vote(
     poll_id: str,
-    db: AsyncSession = Depends(get_db),
-    user: DiscordUser = Depends(require_discord_user),
+    db: DatabaseSession,
+    user: AuthenticatedUser,
 ):
     """Check whether the user can vote in a given poll."""
     try:
@@ -286,8 +284,8 @@ async def can_vote(
 async def create_vote(
     poll_id: str,
     vote: list[str],
-    db: AsyncSession = Depends(get_db),
-    user: DiscordUser = Depends(require_discord_user),
+    db: DatabaseSession,
+    user: AuthenticatedUser,
 ):
     """Create a new vote for a poll."""
     try:
@@ -353,7 +351,7 @@ async def create_vote(
             )
 
         vote_set = set(parsed_vote)
-        option_set = set([o.id for o in poll.options])
+        option_set = {option.id for option in poll.options}
 
         if vote_set != option_set or len(vote_set) != len(parsed_vote):
             return JSONResponse(
@@ -385,8 +383,8 @@ async def create_vote(
 )
 async def list_votes(
     poll_id: str,
-    db: AsyncSession = Depends(get_db),
-    user: DiscordUser = Depends(require_discord_user),
+    db: DatabaseSession,
+    user: AuthenticatedUser,
 ):
     """List vote results for a poll."""
     try:
@@ -460,8 +458,8 @@ async def list_votes(
 async def create_poll_option(
     poll_id: str,
     option: CreatePollOption,
-    db: AsyncSession = Depends(get_db),
-    user: DiscordUser = Depends(require_discord_user),
+    db: DatabaseSession,
+    user: AuthenticatedUser,
 ):
     """Create a new option for a poll."""
     try:
@@ -525,8 +523,8 @@ async def edit_poll_option(
     poll_id: str,
     option_id: str,
     option: EditPollOption,
-    db: AsyncSession = Depends(get_db),
-    user: DiscordUser = Depends(require_discord_user),
+    db: DatabaseSession,
+    user: AuthenticatedUser,
 ):
     """Edit an option for a poll."""
     try:
@@ -586,8 +584,8 @@ async def edit_poll_option(
 async def delete_poll_option(
     poll_id: str,
     option_id: str,
-    db: AsyncSession = Depends(get_db),
-    user: DiscordUser = Depends(require_discord_user),
+    db: DatabaseSession,
+    user: AuthenticatedUser,
 ):
     """Delete an option for a poll."""
     try:
